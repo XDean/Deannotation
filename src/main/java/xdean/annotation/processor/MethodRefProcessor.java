@@ -1,6 +1,5 @@
 package xdean.annotation.processor;
 
-import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -12,6 +11,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -26,15 +26,13 @@ import xdean.annotation.processor.annotation.SupportedAnnotation;
 @SupportedAnnotation(MethodRef.class)
 public class MethodRefProcessor extends XAbstractProcessor {
 
-  private TypeMirror annotationType;
   private TypeMirror classType;
   private Set<TypeElement> visited = new HashSet<>();
 
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
-    annotationType = elements.getTypeElement(Annotation.class.getCanonicalName()).asType();
-    annotationType = elements.getTypeElement(Class.class.getCanonicalName()).asType();
+    classType = types.erasure(elements.getTypeElement(Class.class.getCanonicalName()).asType());
   }
 
   @Override
@@ -50,17 +48,17 @@ public class MethodRefProcessor extends XAbstractProcessor {
     MethodRef mr = annotatedMethod.getAnnotation(MethodRef.class);
     TypeElement annotatedClass = assertType(annotatedMethod.getEnclosingElement(), TypeElement.class)
         .todo(() -> error().log("Except @MethodRef method defined in a class.", annotatedMethod));
+    assertThat(annotatedClass.getKind() == ElementKind.ANNOTATION_TYPE)
+        .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
     assertThat(visited.add(annotatedClass))
         .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
-    TypeMirror annoType = annotatedClass.asType();
-    assertThat(types.isAssignable(annoType, annotationType))
-        .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     if (mr.type() == Type.ALL) {
       char splitor = mr.splitor();
       getClassAndMethod = (e, am) -> {
         AnnotationValue av = am.getElementValues().get(annotatedMethod);
-        String[] split = av.toString().split(Pattern.quote(Character.toString(splitor)));
+        String value = av.getValue().toString();
+        String[] split = value.split(Pattern.quote(Character.toString(splitor)));
         assertThat(split.length == 2)
             .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
         return split;
@@ -68,7 +66,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
     } else {
       ExecutableElement[] refMethods = elements.getAllMembers(annotatedClass)
           .stream()
-          .filter(e -> e instanceof ExecutableElement)
+          .filter(ExecutableElement.class::isInstance)
           .filter(e -> e.getAnnotation(MethodRef.class) != null)
           .toArray(ExecutableElement[]::new);
       assertThat(refMethods.length == 2)
@@ -76,7 +74,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
               "When use @MethodRef.Type.CLASS&METHOD, the annotation must have and only have 2 methods with @MethodRef",
               annotatedClass));
       ExecutableElement ee1 = refMethods[0];
-      ExecutableElement ee2 = refMethods[0];
+      ExecutableElement ee2 = refMethods[1];
       MethodRef mr1 = ee1.getAnnotation(MethodRef.class);
       MethodRef mr2 = ee2.getAnnotation(MethodRef.class);
       ExecutableElement clazz;
@@ -96,23 +94,31 @@ public class MethodRefProcessor extends XAbstractProcessor {
       assertThat(types.isAssignable(clazz.getReturnType(), classType))
           .todo(() -> error().log("Method with @MethodRef(type=CLASS) must return Class", clazz));
       getClassAndMethod = (e, am) -> {
-        String clzValue = ((Class<?>) am.getElementValues().get(clazz).getValue()).getCanonicalName();
-        String methodValue = am.getElementValues().get(method).toString();
+        String clzValue = am.getElementValues().get(clazz).getValue().toString();
+        String methodValue = am.getElementValues().get(method).getValue().toString();
         return new String[] { clzValue, methodValue };
       };
     }
+    TypeMirror annoType = annotatedClass.asType();
     roundEnv.getElementsAnnotatedWith(annotatedClass).forEach(e -> handleAssert(() -> {
       AnnotationMirror anno = ElementUtil.getAnnotationMirror(e, annoType).get();
       String[] pair = getClassAndMethod.apply(e, anno);
       if (pair != null) {
-        TypeElement clz;
-        clz = elements.getTypeElement(pair[0]);
+        TypeElement clz = elements.getTypeElement(pair[0]);
         if (clz == null) {
           try {
-            elements.getTypeElement(Class.forName(pair[0]).getCanonicalName());
+            clz = elements.getTypeElement(Class.forName(pair[0]).getCanonicalName());
           } catch (ClassNotFoundException e1) {
-            e1.printStackTrace();
+            error().log("Can't find the given class: " + pair[0], e, anno);
+            return;
           }
+        }
+        if (!elements.getAllMembers(clz)
+            .stream()
+            .filter(ExecutableElement.class::isInstance)
+            .map(Element::getSimpleName)
+            .anyMatch(n -> n.contentEquals(pair[1]))) {
+          error().log("Can't find the given method: " + pair[1] + " in " + pair[0], e, anno);
         }
       }
     }));
