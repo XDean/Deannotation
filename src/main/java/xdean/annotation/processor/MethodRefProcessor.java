@@ -1,6 +1,7 @@
 package xdean.annotation.processor;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
@@ -8,6 +9,8 @@ import java.util.regex.Pattern;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
@@ -24,8 +27,8 @@ import xdean.annotation.processor.annotation.SupportedAnnotation;
 
 @AutoService(Processor.class)
 @SupportedAnnotation(MethodRef.class)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
-
   private TypeMirror classType;
   private Set<TypeElement> visited = new HashSet<>();
 
@@ -56,7 +59,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
     if (mr.type() == Type.ALL) {
       char splitor = mr.splitor();
       getClassAndMethod = (e, am) -> {
-        AnnotationValue av = am.getElementValues().get(annotatedMethod);
+        AnnotationValue av = elements.getElementValuesWithDefaults(am).get(annotatedMethod);
         String value = av.getValue().toString();
         String[] split = value.split(Pattern.quote(Character.toString(splitor)));
         assertThat(split.length == 2)
@@ -94,8 +97,9 @@ public class MethodRefProcessor extends XAbstractProcessor {
       assertThat(types.isAssignable(clazz.getReturnType(), classType))
           .todo(() -> error().log("Method with @MethodRef(type=CLASS) must return Class", clazz));
       getClassAndMethod = (e, am) -> {
-        String clzValue = am.getElementValues().get(clazz).getValue().toString();
-        String methodValue = am.getElementValues().get(method).getValue().toString();
+        Map<? extends ExecutableElement, ? extends AnnotationValue> values = elements.getElementValuesWithDefaults(am);
+        String clzValue = values.get(clazz).getValue().toString();
+        String methodValue = values.get(method).getValue().toString();
         return new String[] { clzValue, methodValue };
       };
     }
