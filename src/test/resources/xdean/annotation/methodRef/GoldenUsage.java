@@ -2,8 +2,8 @@ package xdean.annotation.methodRef;
 
 import xdean.annotation.methodRef.UseParentClass.Parent;
 
-@Parent(MethodRefGoldenUsage.class)
-interface MethodRefGoldenUsage {
+@Parent(GoldenUsage.class)
+interface GoldenUsage {
   String METHOD = "isNaN";
 
   @UseAll("java.lang.Integer:parseInt")

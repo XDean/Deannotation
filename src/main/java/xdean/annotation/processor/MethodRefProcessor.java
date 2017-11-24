@@ -99,14 +99,22 @@ public class MethodRefProcessor extends XAbstractProcessor {
     } else {
       assertThat(visitedClassAndMethod.add(annotatedClass))
           .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
-      ExecutableElement[] refMethods = elements.getAllMembers(annotatedClass)
+      ExecutableElement[] refMethods = ElementFilter.methodsIn(elements.getAllMembers(annotatedClass))
           .stream()
-          .filter(ExecutableElement.class::isInstance)
-          .filter(e -> e.getAnnotation(MethodRef.class) != null)
+          .filter(e -> {
+            MethodRef methodRef = e.getAnnotation(MethodRef.class);
+            if (methodRef == null) {
+              return false;
+            }
+            return methodRef.type() != Type.ALL &&
+                types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::defaultClass), voidType) &&
+                types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType);
+          })
           .toArray(ExecutableElement[]::new);
       assertThat(refMethods.length == 2)
           .todo(() -> error().log(
-              "When use @MethodRef.Type.CLASS&METHOD, the annotation must have and only have 2 methods with @MethodRef",
+              "When use @MethodRef.Type.CLASS&METHOD, the annotation must have and only have 2 methods with @MethodRef, "
+                  + "one is @MethodRef(type=CLASS), one is @MethodRef(type=METHOD)",
               annotatedClass));
       ExecutableElement ee1 = refMethods[0];
       ExecutableElement ee2 = refMethods[1];

@@ -13,7 +13,7 @@ import com.google.testing.compile.JavaFileObjects;
 import xdean.annotation.processor.MethodRefProcessor;
 
 public class MethodRefTest {
-  private static final JavaFileObject GOLDEN = getSource("MethodRefGoldenDefine.java");
+  private static final JavaFileObject GOLDEN = getSource("GoldenDefine.java");
 
   private static JavaFileObject getSource(String source) {
     return JavaFileObjects.forResource(MethodRefTest.class.getResource(source));
@@ -31,7 +31,15 @@ public class MethodRefTest {
   public void testGoldenUse() throws Exception {
     Compilation compile = Compiler.javac()
         .withProcessors(new MethodRefProcessor())
-        .compile(GOLDEN, getSource("MethodRefGoldenUsage.java"));
+        .compile(GOLDEN, getSource("GoldenUsage.java"));
     assertThat(compile).succeededWithoutWarnings();
+  }
+
+  @Test
+  public void testBadClassMethodDefine() throws Exception {
+    Compilation compile = Compiler.javac()
+        .withProcessors(new MethodRefProcessor())
+        .compile(GOLDEN, getSource("bad/BadClassMethodDefine.java"));
+    assertThat(compile).hadErrorCount(4);
   }
 }

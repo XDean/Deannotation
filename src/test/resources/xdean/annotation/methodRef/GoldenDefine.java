@@ -45,3 +45,28 @@ import xdean.annotation.MethodRef.Type;
   @MethodRef(type = Type.METHOD, parentClass = Parent.class)
   String method();
 }
+
+@Retention(SOURCE)
+@Target(METHOD)
+@interface UseTogether {
+  @Retention(SOURCE)
+  @Target(TYPE)
+  @interface Parent {
+    Class<?> value();
+  }
+
+  @MethodRef
+  String value();
+
+  @MethodRef(type = Type.METHOD, parentClass = Parent.class)
+  String method();
+
+  @MethodRef(type = Type.METHOD, defaultClass = String.class)
+  String method2();
+
+  @MethodRef(type = Type.CLASS)
+  Class<? extends Number> type();
+
+  @MethodRef(type = Type.METHOD)
+  String method3();
+}
