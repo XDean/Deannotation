@@ -95,7 +95,7 @@ public @interface MethodRef {
     </code>
      * </pre>
      *
-     * 3.
+     * 3. Note that the parent annotation must have a Class attribute named 'value'.
      *
      * <pre>
      * <code>
@@ -146,5 +146,5 @@ public @interface MethodRef {
    * @see Type#METHOD
    * @return default class
    */
-  Class<?> defaultClass() default Void.class;
+  Class<?> defaultClass() default void.class;
 }

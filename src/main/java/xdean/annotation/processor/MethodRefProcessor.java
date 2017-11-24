@@ -1,5 +1,7 @@
 package xdean.annotation.processor;
 
+import static xdean.annotation.processor.toolkit.ElementUtil.*;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,14 +19,15 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 
 import com.google.auto.service.AutoService;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
 import xdean.annotation.processor.toolkit.AssertException;
-import xdean.annotation.processor.toolkit.ElementUtil;
 import xdean.annotation.processor.toolkit.XAbstractProcessor;
 import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 
@@ -32,13 +35,15 @@ import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 @SupportedAnnotation(MethodRef.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
-  private TypeMirror classType;
-  private Set<TypeElement> visited = new HashSet<>();
+  private TypeMirror classType, methodRefType, voidType;
+  private Set<TypeElement> visitedClassAndMethod = new HashSet<>();
 
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
     classType = types.erasure(elements.getTypeElement(Class.class.getCanonicalName()).asType());
+    methodRefType = elements.getTypeElement(MethodRef.class.getCanonicalName()).asType();
+    voidType = types.getNoType(TypeKind.VOID);
   }
 
   @Override
@@ -56,8 +61,6 @@ public class MethodRefProcessor extends XAbstractProcessor {
         .todo(() -> error().log("Except @MethodRef method defined in a class.", annotatedMethod));
     assertThat(annotatedClass.getKind() == ElementKind.ANNOTATION_TYPE)
         .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
-    assertThat(visited.add(annotatedClass))
-        .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     if (mr.type() == Type.ALL) {
       char splitor = mr.splitor();
@@ -69,7 +72,33 @@ public class MethodRefProcessor extends XAbstractProcessor {
             .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
         return split;
       };
+    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
+      String className = getAnnotationClassValue(elements, mr, MethodRef::defaultClass).toString();
+      getClassAndMethod = (e, am) -> new String[] { className,
+          elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
+    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
+      TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
+      ExecutableElement valueMethod = assertNonNull(
+          ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
+              .filter(ee -> ee.getSimpleName().contentEquals("value"))
+              .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
+              .findAny()
+              .orElse(null))
+                  .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
+      getClassAndMethod = (e, am) -> {
+        Element enclosingElement = e.getEnclosingElement();
+        AnnotationMirror defaultAnnotation = assertNonNull(getAnnotationMirror(enclosingElement, parentClass).orElse(null))
+            .todo(() -> {
+              error().log("Should annotated by @" + parentClass.toString(), enclosingElement);
+              error().log("Can't find parent annotation @" + parentClass.toString() + " on enclosing element. ", e, am);
+            });
+        return new String[] {
+            elements.getElementValuesWithDefaults(defaultAnnotation).get(valueMethod).getValue().toString(),
+            elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
+      };
     } else {
+      assertThat(visitedClassAndMethod.add(annotatedClass))
+          .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
       ExecutableElement[] refMethods = elements.getAllMembers(annotatedClass)
           .stream()
           .filter(ExecutableElement.class::isInstance)
@@ -108,7 +137,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
     }
     TypeMirror annoType = annotatedClass.asType();
     roundEnv.getElementsAnnotatedWith(annotatedClass).forEach(e -> handleAssert(() -> {
-      AnnotationMirror anno = ElementUtil.getAnnotationMirror(e, annoType).get();
+      AnnotationMirror anno = getAnnotationMirror(e, annoType).get();
       String[] pair = getClassAndMethod.apply(e, anno);
       if (pair != null) {
         TypeElement clz = elements.getTypeElement(pair[0]);
