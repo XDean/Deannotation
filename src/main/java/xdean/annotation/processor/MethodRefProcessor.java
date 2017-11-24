@@ -23,7 +23,10 @@ import com.google.auto.service.AutoService;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
-import xdean.annotation.processor.annotation.SupportedAnnotation;
+import xdean.annotation.processor.toolkit.AssertException;
+import xdean.annotation.processor.toolkit.ElementUtil;
+import xdean.annotation.processor.toolkit.XAbstractProcessor;
+import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 
 @AutoService(Processor.class)
 @SupportedAnnotation(MethodRef.class)
