@@ -1,12 +1,10 @@
-package xdean.annotation.methodRef.testcase.t1;
+package xdean.annotation.methodRef;
 
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.Collection;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
@@ -17,6 +15,7 @@ import xdean.annotation.MethodRef.Type;
 
   @MethodRef
   String value();
+
 }
 
 @Retention(SOURCE)
@@ -24,8 +23,9 @@ import xdean.annotation.MethodRef.Type;
 @interface UseCM {
 
   @MethodRef(type = Type.CLASS)
-  Class<? extends Collection<?>> type();
+  Class<? extends Number> type();
 
   @MethodRef(type = Type.METHOD)
   String method();
+
 }
