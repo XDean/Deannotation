@@ -60,14 +60,14 @@ public @interface MethodRef {
      * </ul>
      * <p>
      * Example: <br>
-     * 1. Note that if you use Class and Method, there must have and only have 2 attribute with {@link &#64;MethodRef}
+     * 1. Note that if you use Class and Method, there must have and only have 2 attribute with &#64;{@link MethodRef}
      *
      * <pre>
      * <code>
     //define
     &#64;interface UseClassAndMethod {
       &#64;MethodRef(type = Type.CLASS)
-      Class<? extends Number> type();
+      Class&#60;? extends Number&#62; type();
 
       &#64;MethodRef(type = Type.METHOD)
       String method();
@@ -102,7 +102,7 @@ public @interface MethodRef {
     //define
     &#64;interface UseParentClass {
       &#64;interface Parent {
-        Class<?> value();
+        Class&#60;?&#62; value();
       }
 
       &#64;MethodRef(type = Type.METHOD, parentClass = Parent.class)
@@ -123,6 +123,7 @@ public @interface MethodRef {
 
   /**
    * @see Type
+   * @return type
    */
   Type type() default Type.ALL;
 
@@ -131,16 +132,19 @@ public @interface MethodRef {
    * For example: "java.lang.String:length" with splitor ':'.
    *
    * @see Type#METHOD
+   * @return splitor char
    */
   char splitor() default ':';
 
   /**
    * @see Type#METHOD
+   * @return parent class
    */
   Class<? extends Annotation> parentClass() default MethodRef.class;
 
   /**
    * @see Type#METHOD
+   * @return default class
    */
   Class<?> defaultClass() default Void.class;
 }
