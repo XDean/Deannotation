@@ -1,7 +1,6 @@
 package xdean.annotation.methodRef;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
-import static org.junit.Assert.*;
 
 import javax.tools.JavaFileObject;
 
@@ -66,5 +65,21 @@ public class MethodRefTest {
         .withProcessors(new MethodRefProcessor())
         .compile(GOLDEN, getSource("BadParentDefine.java"));
     assertThat(compile).hadErrorCount(2);
+  }
+
+  @Test
+  public void testBadParentUsage() throws Exception {
+    Compilation compile = Compiler.javac()
+        .withProcessors(new MethodRefProcessor())
+        .compile(GOLDEN, getSource("BadParentUsage.java"));
+    assertThat(compile).hadErrorCount(5);
+  }
+
+  @Test
+  public void testBadDefaultUsage() throws Exception {
+    Compilation compile = Compiler.javac()
+        .withProcessors(new MethodRefProcessor())
+        .compile(GOLDEN, getSource("BadDefaultUsage.java"));
+    assertThat(compile).hadErrorCount(1);
   }
 }

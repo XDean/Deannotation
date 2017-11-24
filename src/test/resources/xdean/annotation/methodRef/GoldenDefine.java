@@ -34,10 +34,10 @@ import xdean.annotation.MethodRef.Type;
 }
 
 @Retention(SOURCE)
-@Target(METHOD)
+@Target({ METHOD, TYPE })
 @interface UseParentClass {
   @Retention(SOURCE)
-  @Target(TYPE)
+  @Target({ TYPE, PACKAGE })
   @interface Parent {
     Class<?> value();
   }
@@ -47,10 +47,10 @@ import xdean.annotation.MethodRef.Type;
 }
 
 @Retention(SOURCE)
-@Target(METHOD)
+@Target({ METHOD, TYPE })
 @interface UseTogether {
   @Retention(SOURCE)
-  @Target(TYPE)
+  @Target({ TYPE, PACKAGE })
   @interface Parent {
     Class<?> value();
   }
