@@ -1,4 +1,4 @@
-package xdean.annotation.methodRef.bad;
+package xdean.annotation.methodRef;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
