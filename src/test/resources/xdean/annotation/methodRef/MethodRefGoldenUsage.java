@@ -1,12 +1,23 @@
 package xdean.annotation.methodRef;
 
-@UseClass("java.lang.Integer:parseInt")
+import xdean.annotation.methodRef.UseParentClass.Parent;
+
+@Parent(MethodRefGoldenUsage.class)
 interface MethodRefGoldenUsage {
   String METHOD = "isNaN";
 
-  @UseCM(type = Integer.class, method = "intValue")
-  void func();
+  @UseAll("java.lang.Integer:parseInt")
+  void a();
 
-  @UseCM(type = Double.class, method = METHOD)
-  void bar();
+  @UseClassAndMethod(type = Integer.class, method = "intValue")
+  void b();
+
+  @UseClassAndMethod(type = Double.class, method = METHOD)
+  void c();
+
+  @UseParentClass(method = "a")
+  void d();
+
+  @UseDefaultClass(method = "length")
+  void e();
 }

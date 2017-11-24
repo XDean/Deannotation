@@ -10,22 +10,38 @@ import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
 
 @Retention(SOURCE)
-@Target({ TYPE, METHOD })
-@interface UseClass {
-
+@Target(METHOD)
+@interface UseAll {
   @MethodRef
   String value();
-
 }
 
 @Retention(SOURCE)
-@Target({ TYPE, METHOD })
-@interface UseCM {
-
+@Target(METHOD)
+@interface UseClassAndMethod {
   @MethodRef(type = Type.CLASS)
   Class<? extends Number> type();
 
   @MethodRef(type = Type.METHOD)
   String method();
+}
 
+@Retention(SOURCE)
+@Target(METHOD)
+@interface UseDefaultClass {
+  @MethodRef(type = Type.METHOD, defaultClass = String.class)
+  String method();
+}
+
+@Retention(SOURCE)
+@Target(METHOD)
+@interface UseParentClass {
+  @Retention(SOURCE)
+  @Target(TYPE)
+  @interface Parent {
+    Class<?> value();
+  }
+
+  @MethodRef(type = Type.METHOD, parentClass = Parent.class)
+  String method();
 }
