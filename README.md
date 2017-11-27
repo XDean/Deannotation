@@ -15,8 +15,8 @@
 ```
 
 # Features
-
-- [@MethodRef](#MethodRef)
+- [@MethodRef](#methodref)
+- [Use in Eclipse](#use-in-eclipse)
 
 
 ## @MethodRef
@@ -24,13 +24,15 @@
 Provide a compile safe method reference when use annotation.
 
 ### Usage
-There are 4 types of MethodRef:
 
-- Type.ALL
+There are 4 usage modes.
 
-Annotated on a String attribute, its value will be parsed to class name and method name. 
+#### Referenced by Full Name
 
-Example:
+Annotated on a String attribute, its value will be parsed to class name and method name.
+Note that the default splitor is ':'.
+
+Example
 
 ```java
 //define
@@ -44,16 +46,14 @@ Example:
 void func();
 ```
 
-- Type.METHOD 
 
-Annotated on a String attribute, it has following modes:
-
-1. Class and Method. Use with another attribute with Type.CLASS, reference method from class by the other attribute's value.
-Note that if you use Class and Method, there must have and only have 2 attribute with @MethodRef 
+#### Class and Method
+Use `@MethodRef(type = Type.CLASS)` on a `Class<?>` attribute and `@MethodRef(type = Type.METHOD)` on a String attribute together.
+Reference method from the class by the method attribute's value.
 
 Example
 
-```
+```java
 //define
 @interface UseClassAndMethod {
   @MethodRef(type = Type.CLASS)
@@ -68,9 +68,11 @@ Example
 void func();
 ```
 
-2. DefaultClass. Use with MethodRef.defaultClass(), reference method from the determined class
+#### DefaultClass 
+Use `Type.METHOD` with `defaultClass()`.
+Reference method from the determined class.
 
-```
+```java
 //define
 @interface UseDefaultClass {
   @MethodRef(type = Type.METHOD, defaultClass = String.class)
@@ -82,10 +84,12 @@ void func();
 void func();
 ```
 
-3. ParentClass. Use with MethodRef.parentClass(), reference method from class by its EnclosingElement(usually a class)'s annotation's value.
+#### ParentClass
+Use `Type.METHOD` with `parentClass()`
+Reference method from class by its EnclosingElement(usually a class)'s annotation's value.
 Note that the parent annotation must have a Class attribute named 'value'
  
-```
+```java
 //define
 @interface UseParentClass {
   @interface Parent {
@@ -103,5 +107,15 @@ class Bar{
   void func();
 }
 ```
+
+### Eclipse use snapshot
+![eclipse-use-methodref](doc/snapshot/eclipse-use-methodref.jpg)
   
-### Use in Eclipse
+## Use in Eclipse
+1. Right click on your project, select `Java Compiler -> Annotation Processing`, enable the 3 options.
+![eclipse-setting-1](doc/snapshot/eclipse-setting-1.jpg)
+2. Right click on your project, select `Java Compiler -> Annotation Processing -> Factory Path`, add jars.
+Note the dependencies order.
+![eclipse-setting-2](doc/snapshot/eclipse-setting-2.jpg)
+
+Or you can use [m2e-apt](https://marketplace.eclipse.org/content/m2e-apt) plugin.
