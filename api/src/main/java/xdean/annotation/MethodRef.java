@@ -31,7 +31,7 @@ public @interface MethodRef {
     }
 
     //usage
-    &#64;UseAll("java.lang.String::length")
+    &#64;UseAll("java.lang.String:length")
     void func();
 
     </code>
