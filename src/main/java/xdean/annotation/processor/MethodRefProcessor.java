@@ -101,6 +101,8 @@ public class MethodRefProcessor extends XAbstractProcessor {
           Map<String, String> env = new HashMap<>();
           env.put("create", "true");
           FileSystems.newFileSystem(uri, env);
+        } catch (IllegalArgumentException e) {
+          debug().log(e.getMessage());
         }
         Files.readAllLines(Paths.get(uri)).forEach(set::add);
       }
