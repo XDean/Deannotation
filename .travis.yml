@@ -6,12 +6,5 @@ cache:
   - $HOME/.m2
 jdk:
 - oraclejdk8
-install: echo "skip"
-script:
-- pwd
-- cd api
-- mvn clean install
-- cd ../processor
-- mvn clean package
 after_success:
 - bash <(curl -s https://codecov.io/bash)

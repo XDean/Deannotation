@@ -4,6 +4,7 @@
 	<groupId>com.github.XDean</groupId>
 	<artifactId>Annotation-EX</artifactId>
 	<version>0.1</version>
+	<packaging>pom</packaging>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -25,20 +26,8 @@
 		</dependency>
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.7</version>
-				<configuration>
-					<formats>
-						<format>html</format>
-						<format>xml</format>
-					</formats>
-					<check />
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	<modules>
+		<module>api/</module>
+		<module>processor/</module>
+	</modules>
 </project>
