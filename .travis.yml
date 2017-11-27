@@ -3,20 +3,15 @@ language: java
 dist: trusty
 cache:
   directories:
-    - $HOME/.m2
-
+  - $HOME/.m2
 jdk:
-  - oraclejdk8
-  
-script: 
-  - cd ~ 
-  - pwd
-  - cd api
-  - mvn clean install cobertura:cobertura
-  - cd ../processor
-  - mvn clean install cobertura:cobertura
-  - cd ..
-  - mvn cobertura:cobertura
-
+- oraclejdk8
+install: echo "skip"
+script:
+- pwd
+- cd api
+- mvn clean install
+- cd ../processor
+- mvn clean package
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+- bash <(curl -s https://codecov.io/bash)
