@@ -2,12 +2,27 @@ package xdean.annotation.processor;
 
 import static xdean.annotation.processor.toolkit.ElementUtil.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -22,6 +37,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 
 import com.google.auto.service.AutoService;
 
@@ -35,8 +52,10 @@ import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 @SupportedAnnotation(MethodRef.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
+  private static final String RECORD_FILE = "META-INF/xdean/annotation/MethodRef";
   private TypeMirror classType, methodRefType, voidType;
   private Set<TypeElement> visitedClassAndMethod = new HashSet<>();
+  private Set<String> allMethodRefAnnotations = new HashSet<>();
 
   @Override
   public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -48,10 +67,60 @@ public class MethodRefProcessor extends XAbstractProcessor {
 
   @Override
   public boolean processActual(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-    roundEnv.getElementsAnnotatedWith(MethodRef.class)
+    if (roundEnv.processingOver()) {
+      generateConfigFiles(roundEnv);
+    } else {
+      valid(annotations, roundEnv);
+    }
+    return false;
+  }
+
+  private void generateConfigFiles(RoundEnvironment roundEnv) {
+    try {
+      Filer filer = processingEnv.getFiler();
+      FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, "", RECORD_FILE);
+      OutputStream output = resource.openOutputStream();
+      PrintStream writer = new PrintStream(output, false, "UTF-8");
+      allMethodRefAnnotations.forEach(writer::println);
+      writer.flush();
+    } catch (IOException e) {
+      error().log("Unable to create " + RECORD_FILE + ", " + e);
+    }
+  }
+
+  @Override
+  public Set<String> getSupportedAnnotationTypes() {
+    Set<String> set = new HashSet<>(super.getSupportedAnnotationTypes());
+    try {
+      Enumeration<URL> resource = getClass().getClassLoader().getResources(RECORD_FILE);
+      for (URL url : Collections.list(resource)) {
+        URI uri = url.toURI();
+        try {
+          FileSystems.getFileSystem(uri);
+        } catch (FileSystemNotFoundException e) {
+          Map<String, String> env = new HashMap<>();
+          env.put("create", "true");
+          FileSystems.newFileSystem(uri, env);
+        }
+        Files.readAllLines(Paths.get(uri)).forEach(set::add);
+      }
+    } catch (IOException | URISyntaxException e1) {
+      error().log("error happened when read record file: " + e1.getMessage());
+    }
+    return set;
+  }
+
+  private void valid(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    Stream.concat(
+        annotations.stream()
+            .flatMap(typeElement -> ElementFilter.methodsIn(typeElement.getEnclosedElements())
+                .stream()
+                .filter(ee -> ee.getAnnotation(MethodRef.class) != null)),
+        roundEnv.getElementsAnnotatedWith(MethodRef.class)
+            .stream())
+        .distinct()
         .forEach(e -> handleAssert(() -> valid(assertType(e, ExecutableElement.class)
             .todo(() -> error().log("MethodRef can only annotate on method element.", e)), roundEnv)));
-    return true;
   }
 
   private void valid(ExecutableElement annotatedMethod, RoundEnvironment roundEnv) throws AssertException {
@@ -62,6 +131,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
     assertThat(annotatedClass.getKind() == ElementKind.ANNOTATION_TYPE)
         .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
+    // Use All
     if (mr.type() == Type.ALL) {
       char splitor = mr.splitor();
       getClassAndMethod = (e, am) -> {
@@ -72,11 +142,15 @@ public class MethodRefProcessor extends XAbstractProcessor {
             .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
         return split;
       };
-    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
+    }
+    // Use default class
+    else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
       String className = getAnnotationClassValue(elements, mr, MethodRef::defaultClass).toString();
       getClassAndMethod = (e, am) -> new String[] { className,
           elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
-    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
+    }
+    // Use parent class
+    else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
       TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
       ExecutableElement valueMethod = assertNonNull(
           ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
@@ -96,7 +170,9 @@ public class MethodRefProcessor extends XAbstractProcessor {
             elements.getElementValuesWithDefaults(defaultAnnotation).get(valueMethod).getValue().toString(),
             elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
       };
-    } else {
+    }
+    // Use Class and Method
+    else {
       assertThat(visitedClassAndMethod.add(annotatedClass))
           .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
       ExecutableElement[] refMethods = ElementFilter.methodsIn(elements.getAllMembers(annotatedClass))
@@ -143,8 +219,13 @@ public class MethodRefProcessor extends XAbstractProcessor {
         return new String[] { clzValue, methodValue };
       };
     }
-    TypeMirror annoType = annotatedClass.asType();
-    roundEnv.getElementsAnnotatedWith(annotatedClass).forEach(e -> handleAssert(() -> {
+    valid(annotatedClass, getClassAndMethod, roundEnv);
+    allMethodRefAnnotations.add(annotatedClass.getQualifiedName().toString());
+  }
+
+  private void valid(TypeElement theAnnotation, BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod, RoundEnvironment roundEnv) {
+    TypeMirror annoType = theAnnotation.asType();
+    roundEnv.getElementsAnnotatedWith(theAnnotation).forEach(e -> handleAssert(() -> {
       AnnotationMirror anno = getAnnotationMirror(e, annoType).get();
       String[] pair = getClassAndMethod.apply(e, anno);
       if (pair != null) {
