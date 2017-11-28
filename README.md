@@ -44,7 +44,7 @@ Provide a compile safe method reference when use annotation.
 
 There are 4 usage modes.
 
-#### Referenced by Full Name
+#### 1. Referenced by Full Name
 
 Annotated on a String attribute, its value will be parsed to class name and method name.
 Note that the default splitor is ':'.
@@ -64,9 +64,11 @@ void func();
 ```
 
 
-#### Class and Method
+#### 2. Class and Method
 Use `@MethodRef(type = Type.CLASS)` on a `Class<?>` attribute and `@MethodRef(type = Type.METHOD)` on a `String` attribute together.
-Reference method from the class by the method attribute's value.
+Reference method from the class by the method attribute's value. 
+The `Class` attribute can also set a parent class, if the class attribute value is `void.class`,
+the parent annotation value will be used. 
 
 Example
 
@@ -85,7 +87,34 @@ Example
 void func();
 ```
 
-#### DefaultClass 
+With parent class
+
+```java
+//define
+@interface UseClassAndMethodWithParent {
+  @interface Parent {
+    Class<?> value();
+  }
+
+  @MethodRef(type = Type.CLASS, parentClass = Parent.class)
+  Class<?> type() default void.class;
+
+  @MethodRef(type = Type.METHOD)
+  String method();
+}
+
+//usage
+@Parent(Integer.class)
+class Bar{
+  @UseClassAndMethodWithParent(method = "intValue")
+  void func();
+  
+  @UseClassAndMethodWithParent(method = "isNaN", type = Double.class)
+  void foo();
+}
+```
+
+#### 3. DefaultClass 
 Use `Type.METHOD` with `defaultClass`.
 Reference method from the determined class.
 
@@ -101,7 +130,7 @@ Reference method from the determined class.
 void func();
 ```
 
-#### ParentClass
+#### 4. ParentClass
 Use `Type.METHOD` with `parentClass`
 Reference method from class by its EnclosingElement(usually a class)'s annotation's value.
 Note that the parent annotation must have a Class attribute named 'value'

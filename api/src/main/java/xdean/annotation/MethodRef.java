@@ -49,15 +49,17 @@ public @interface MethodRef {
     /**
      * Annotated on a String attribute, it has following modes:
      * <ul>
-     * <li>Use with another attribute with {@link Type#CLASS}, reference method from class by the other attribute's
-     * value</li>
+     * <li>Use with another attribute with type={@link Type#CLASS}(also can set a parent class), reference method from
+     * class by the other attribute's value</li>
      * <li>Use with {@link MethodRef#defaultClass()}, reference method from the determined class</li>
      * <li>Use with {@link MethodRef#parentClass()}, reference method from class by its EnclosingElement(usually a
      * class)'s annotation's value</li>
      * </ul>
      * <p>
      * Example: <br>
-     * 1. Note that if you use Class and Method, there must have and only have 2 attribute with &#64;{@link MethodRef}
+     * 1. Note that if you use Class and Method, there must have and only have 2 attribute with &#64;{@link MethodRef}.
+     * And the Class attribute can also set a parent class, if the class value is {@code void.class}, the parent
+     * annotation value will be used.
      *
      * <pre>
      * <code>
@@ -73,6 +75,30 @@ public @interface MethodRef {
     //usage
     &#64;UseClassAndMethod(type = Integer.class, method = "intValue")
     void func();
+    </code>
+     * </pre>
+     *
+     * <pre>
+     * <code>
+    //define
+    &#64;interface UseClassAndMethodWithParent {
+      &#64;interface Parent {
+        Class&#60;?&#62; value();
+      }
+
+      &#64;MethodRef(type = Type.CLASS, parentClass = Parent.class)
+      Class&#60;?&#62; type() default void.class;
+
+      &#64;MethodRef(type = Type.METHOD)
+      String method();
+    }
+
+    //usage
+    &#64;Parent(Integer.class)
+    class Bar{
+      &#64;UseClassAndMethodWithParent(method = "intValue")
+      void func();
+    }
     </code>
      * </pre>
      *
