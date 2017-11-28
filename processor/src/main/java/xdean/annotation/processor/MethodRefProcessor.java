@@ -53,6 +53,9 @@ import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 @SupportedAnnotation(MethodRef.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
+  /**
+   * Use a file to record which annotations used {@link MethodRef} for nested dependency.
+   */
   private static final String RECORD_FILE = "META-INF/xdean/annotation/MethodRef";
   private TypeMirror classType, methodRefType, voidType;
   private Set<TypeElement> visitedClassAndMethod = new HashSet<>();

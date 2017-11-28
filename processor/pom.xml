@@ -15,6 +15,16 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>23.1-jre</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.github.XDean</groupId>
@@ -40,6 +50,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<developers>
 		<developer>
 			<name>XDean</name>

@@ -3,6 +3,7 @@ package xdean.annotation.methodRef;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import xdean.annotation.processor.MethodRefProcessor;
 
 public class MethodRefTest {
   private static final JavaFileObject GOLDEN = getSource("GoldenDefine.java");
+  private static final String RECORD_FILE = "META-INF/xdean/annotation/MethodRef";
 
   private static JavaFileObject getSource(String source) {
     return JavaFileObjects.forResource(MethodRefTest.class.getResource(source));
@@ -25,6 +27,8 @@ public class MethodRefTest {
         .withProcessors(new MethodRefProcessor())
         .compile(GOLDEN);
     assertThat(compile).succeededWithoutWarnings();
+    // TODO: add content compare, https://github.com/google/compile-testing/issues/139
+    assertThat(compile).generatedFile(StandardLocation.CLASS_OUTPUT, RECORD_FILE);
   }
 
   @Test
@@ -89,5 +93,11 @@ public class MethodRefTest {
         .withProcessors(new MethodRefProcessor())
         .compile(GOLDEN, getSource("BadDefaultUsage.java"));
     assertThat(compile).hadErrorCount(1);
+  }
+
+  @Test
+  public void testNestedDependency() throws Exception {
+    Compiler.javac()
+        .withProcessors(new MethodRefProcessor());
   }
 }
