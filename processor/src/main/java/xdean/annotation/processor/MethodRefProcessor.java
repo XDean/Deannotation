@@ -133,96 +133,113 @@ public class MethodRefProcessor extends XAbstractProcessor {
     assertThat(annotatedClass.getKind() == ElementKind.ANNOTATION_TYPE)
         .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
-    // Use All
     if (mr.type() == Type.ALL) {
-      char splitor = mr.splitor();
-      getClassAndMethod = (e, am) -> {
-        AnnotationValue av = elements.getElementValuesWithDefaults(am).get(annotatedMethod);
-        String value = av.getValue().toString();
-        String[] split = value.split(Pattern.quote(Character.toString(splitor)));
-        assertThat(split.length == 2)
-            .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
-        return split;
-      };
-    }
-    // Use default class
-    else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
-      String className = getAnnotationClassValue(elements, mr, MethodRef::defaultClass).toString();
-      getClassAndMethod = (e, am) -> new String[] { className,
-          elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
-    }
-    // Use parent class
-    else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
-      TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
-      ExecutableElement valueMethod = assertNonNull(
-          ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
-              .filter(ee -> ee.getSimpleName().contentEquals("value"))
-              .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
-              .findAny()
-              .orElse(null))
-                  .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
-      getClassAndMethod = (e, am) -> {
-        Element enclosingElement = e.getEnclosingElement();
-        AnnotationMirror defaultAnnotation = assertNonNull(getAnnotationMirror(enclosingElement, parentClass).orElse(null))
-            .todo(() -> {
-              error().log("Should annotated by @" + parentClass.toString(), enclosingElement);
-              error().log("Can't find parent annotation @" + parentClass.toString() + " on enclosing element. ", e, am);
-            });
-        return new String[] {
-            elements.getElementValuesWithDefaults(defaultAnnotation).get(valueMethod).getValue().toString(),
-            elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
-      };
-    }
-    // Use Class and Method
-    else {
-      assertThat(visitedClassAndMethod.add(annotatedClass))
-          .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
-      ExecutableElement[] refMethods = ElementFilter.methodsIn(elements.getAllMembers(annotatedClass))
-          .stream()
-          .filter(e -> {
-            MethodRef methodRef = e.getAnnotation(MethodRef.class);
-            if (methodRef == null) {
-              return false;
-            }
-            return methodRef.type() != Type.ALL &&
-                types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::defaultClass), voidType) &&
-                types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType);
-          })
-          .toArray(ExecutableElement[]::new);
-      assertThat(refMethods.length == 2)
-          .todo(() -> error().log(
-              "When use @MethodRef.Type.CLASS&METHOD, the annotation must have and only have 2 methods with @MethodRef, "
-                  + "one is @MethodRef(type=CLASS), one is @MethodRef(type=METHOD)",
-              annotatedClass));
-      ExecutableElement ee1 = refMethods[0];
-      ExecutableElement ee2 = refMethods[1];
-      MethodRef mr1 = ee1.getAnnotation(MethodRef.class);
-      MethodRef mr2 = ee2.getAnnotation(MethodRef.class);
-      ExecutableElement clazz;
-      ExecutableElement method;
-      if (mr1.type() == Type.CLASS && mr2.type() == Type.METHOD) {
-        clazz = ee1;
-        method = ee2;
-      } else if (mr1.type() == Type.METHOD && mr2.type() == Type.CLASS) {
-        clazz = ee2;
-        method = ee1;
-      } else {
-        error().log(
-            "When use @MethodRef.Type.CLASS&METHOD, the annotation must have 1 method with Type.CLASS and 1 method with Type.METHOD",
-            annotatedClass);
-        return;
-      }
-      assertThat(types.isAssignable(clazz.getReturnType(), classType))
-          .todo(() -> error().log("Method with @MethodRef(type=CLASS) must return Class", clazz));
-      getClassAndMethod = (e, am) -> {
-        Map<? extends ExecutableElement, ? extends AnnotationValue> values = elements.getElementValuesWithDefaults(am);
-        String clzValue = values.get(clazz).getValue().toString();
-        String methodValue = values.get(method).getValue().toString();
-        return new String[] { clzValue, methodValue };
-      };
+      getClassAndMethod = useAll(annotatedMethod, mr);
+    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
+      getClassAndMethod = useDefaultClass(annotatedMethod, mr);
+    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
+      getClassAndMethod = useParentClass(annotatedMethod, mr);
+    } else {
+      getClassAndMethod = useClassAndMethod(annotatedClass);
     }
     valid(annotatedClass, getClassAndMethod, roundEnv);
     allMethodRefAnnotations.add(annotatedClass.getQualifiedName().toString());
+  }
+
+  private BiFunction<Element, AnnotationMirror, String[]> useAll(ExecutableElement annotatedMethod, MethodRef mr) {
+    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
+    char splitor = mr.splitor();
+    getClassAndMethod = (e, am) -> {
+      AnnotationValue av = elements.getElementValuesWithDefaults(am).get(annotatedMethod);
+      String value = av.getValue().toString();
+      String[] split = value.split(Pattern.quote(Character.toString(splitor)));
+      assertThat(split.length == 2)
+          .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
+      return split;
+    };
+    return getClassAndMethod;
+  }
+
+  private BiFunction<Element, AnnotationMirror, String[]> useDefaultClass(ExecutableElement annotatedMethod, MethodRef mr) {
+    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
+    String className = getAnnotationClassValue(elements, mr, MethodRef::defaultClass).toString();
+    getClassAndMethod = (e, am) -> new String[] { className,
+        elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
+    return getClassAndMethod;
+  }
+
+  private BiFunction<Element, AnnotationMirror, String[]> useParentClass(ExecutableElement annotatedMethod, MethodRef mr) {
+    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
+    TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
+    ExecutableElement valueMethod = assertNonNull(
+        ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
+            .filter(ee -> ee.getSimpleName().contentEquals("value"))
+            .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
+            .findAny()
+            .orElse(null))
+                .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
+    getClassAndMethod = (e, am) -> {
+      Element enclosingElement = e.getEnclosingElement();
+      AnnotationMirror defaultAnnotation = assertNonNull(getAnnotationMirror(enclosingElement, parentClass).orElse(null))
+          .todo(() -> {
+            error().log("Should annotated by @" + parentClass.toString(), enclosingElement);
+            error().log("Can't find parent annotation @" + parentClass.toString() + " on enclosing element. ", e, am);
+          });
+      return new String[] {
+          elements.getElementValuesWithDefaults(defaultAnnotation).get(valueMethod).getValue().toString(),
+          elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
+    };
+    return getClassAndMethod;
+  }
+
+  private BiFunction<Element, AnnotationMirror, String[]> useClassAndMethod(TypeElement annotatedClass) {
+    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
+    assertThat(visitedClassAndMethod.add(annotatedClass))
+        .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
+    ExecutableElement[] refMethods = ElementFilter.methodsIn(elements.getAllMembers(annotatedClass))
+        .stream()
+        .filter(e -> {
+          MethodRef methodRef = e.getAnnotation(MethodRef.class);
+          if (methodRef == null) {
+            return false;
+          }
+          return methodRef.type() != Type.ALL &&
+              types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::defaultClass), voidType) &&
+              types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType);
+        })
+        .toArray(ExecutableElement[]::new);
+    assertThat(refMethods.length == 2)
+        .todo(() -> error().log(
+            "When use @MethodRef.Type.CLASS&METHOD, the annotation must have and only have 2 methods with @MethodRef, "
+                + "one is @MethodRef(type=CLASS), one is @MethodRef(type=METHOD)",
+            annotatedClass));
+    ExecutableElement ee1 = refMethods[0];
+    ExecutableElement ee2 = refMethods[1];
+    MethodRef mr1 = ee1.getAnnotation(MethodRef.class);
+    MethodRef mr2 = ee2.getAnnotation(MethodRef.class);
+    ExecutableElement clazz;
+    ExecutableElement method;
+    if (mr1.type() == Type.CLASS && mr2.type() == Type.METHOD) {
+      clazz = ee1;
+      method = ee2;
+    } else if (mr1.type() == Type.METHOD && mr2.type() == Type.CLASS) {
+      clazz = ee2;
+      method = ee1;
+    } else {
+      error().log(
+          "When use @MethodRef.Type.CLASS&METHOD, the annotation must have 1 method with Type.CLASS and 1 method with Type.METHOD",
+          annotatedClass);
+      throw new AssertException();
+    }
+    assertThat(types.isAssignable(clazz.getReturnType(), classType))
+        .todo(() -> error().log("Method with @MethodRef(type=CLASS) must return Class", clazz));
+    getClassAndMethod = (e, am) -> {
+      Map<? extends ExecutableElement, ? extends AnnotationValue> values = elements.getElementValuesWithDefaults(am);
+      String clzValue = values.get(clazz).getValue().toString();
+      String methodValue = values.get(method).getValue().toString();
+      return new String[] { clzValue, methodValue };
+    };
+    return getClassAndMethod;
   }
 
   private void valid(TypeElement theAnnotation, BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod, RoundEnvironment roundEnv) {
