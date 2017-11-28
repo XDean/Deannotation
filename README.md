@@ -33,6 +33,7 @@ Or
 # Features
 - [@MethodRef](#methodref)
 - [Use in Eclipse](#use-in-eclipse)
+- [Version changes](doc/ChangesNote.md)
 
 
 ## @MethodRef
