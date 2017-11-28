@@ -9,11 +9,27 @@
 
 ```xml
 <dependency>
+  <groupId>com.github.XDean</groupId>
+  <artifactId>Annotation-EX-api</artifactId>
+  <version>0.1</version>
+</dependency>
+<dependency>
+  <groupId>com.github.XDean</groupId>
+  <artifactId>Annotation-EX-processor</artifactId>
+  <version>0.1</version>
+</dependency>
+```
+
+Or
+
+```xml
+<dependency>
     <groupId>com.github.XDean</groupId>
     <artifactId>Annotation-EX</artifactId>
     <version>0.1</version>
 </dependency>
 ```
+<sup>0.1 not support this yet</sup>
 
 # Features
 - [@MethodRef](#methodref)
@@ -49,7 +65,7 @@ void func();
 
 
 #### Class and Method
-Use `@MethodRef(type = Type.CLASS)` on a `Class<?>` attribute and `@MethodRef(type = Type.METHOD)` on a String attribute together.
+Use `@MethodRef(type = Type.CLASS)` on a `Class<?>` attribute and `@MethodRef(type = Type.METHOD)` on a `String` attribute together.
 Reference method from the class by the method attribute's value.
 
 Example
@@ -70,7 +86,7 @@ void func();
 ```
 
 #### DefaultClass 
-Use `Type.METHOD` with `defaultClass()`.
+Use `Type.METHOD` with `defaultClass`.
 Reference method from the determined class.
 
 ```java
@@ -86,7 +102,7 @@ void func();
 ```
 
 #### ParentClass
-Use `Type.METHOD` with `parentClass()`
+Use `Type.METHOD` with `parentClass`
 Reference method from class by its EnclosingElement(usually a class)'s annotation's value.
 Note that the parent annotation must have a Class attribute named 'value'
  
