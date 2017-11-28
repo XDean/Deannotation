@@ -36,6 +36,14 @@ public class MethodRefTest {
   }
 
   @Test
+  public void testBadDefine() throws Exception {
+    Compilation compile = Compiler.javac()
+        .withProcessors(new MethodRefProcessor())
+        .compile(getSource("BadDefine.java"));
+    assertThat(compile).hadErrorCount(1);
+  }
+
+  @Test
   public void testBadAllUsage() throws Exception {
     Compilation compile = Compiler.javac()
         .withProcessors(new MethodRefProcessor())
@@ -47,8 +55,8 @@ public class MethodRefTest {
   public void testBadClassMethodDefine() throws Exception {
     Compilation compile = Compiler.javac()
         .withProcessors(new MethodRefProcessor())
-        .compile(GOLDEN, getSource("BadClassMethodDefine.java"));
-    assertThat(compile).hadErrorCount(4);
+        .compile(getSource("BadClassMethodDefine.java"));
+    assertThat(compile).hadErrorCount(5);
   }
 
   @Test
@@ -63,7 +71,7 @@ public class MethodRefTest {
   public void testBadParentDefine() throws Exception {
     Compilation compile = Compiler.javac()
         .withProcessors(new MethodRefProcessor())
-        .compile(GOLDEN, getSource("BadParentDefine.java"));
+        .compile(getSource("BadParentDefine.java"));
     assertThat(compile).hadErrorCount(2);
   }
 

@@ -17,6 +17,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
@@ -129,7 +130,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
     debug().log("To validate: " + annotatedMethod);
     MethodRef mr = annotatedMethod.getAnnotation(MethodRef.class);
     TypeElement annotatedClass = assertType(annotatedMethod.getEnclosingElement(), TypeElement.class)
-        .todo(() -> error().log("Except @MethodRef method defined in a class.", annotatedMethod));
+        .todo(() -> error().log("@MethodRef method must defined in a class.", annotatedMethod));
     assertThat(annotatedClass.getKind() == ElementKind.ANNOTATION_TYPE)
         .todo(() -> error().log("@MethodRef can only annotated on @interface class's method.", annotatedMethod));
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
@@ -147,9 +148,8 @@ public class MethodRefProcessor extends XAbstractProcessor {
   }
 
   private BiFunction<Element, AnnotationMirror, String[]> useAll(ExecutableElement annotatedMethod, MethodRef mr) {
-    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     char splitor = mr.splitor();
-    getClassAndMethod = (e, am) -> {
+    return (e, am) -> {
       AnnotationValue av = elements.getElementValuesWithDefaults(am).get(annotatedMethod);
       String value = av.getValue().toString();
       String[] split = value.split(Pattern.quote(Character.toString(splitor)));
@@ -157,28 +157,18 @@ public class MethodRefProcessor extends XAbstractProcessor {
           .todo(() -> error().log("The method reference must be $ClassName" + splitor + "$MethodName", e, am, av));
       return split;
     };
-    return getClassAndMethod;
   }
 
   private BiFunction<Element, AnnotationMirror, String[]> useDefaultClass(ExecutableElement annotatedMethod, MethodRef mr) {
-    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     String className = getAnnotationClassValue(elements, mr, MethodRef::defaultClass).toString();
-    getClassAndMethod = (e, am) -> new String[] { className,
+    return (e, am) -> new String[] { className,
         elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
-    return getClassAndMethod;
   }
 
   private BiFunction<Element, AnnotationMirror, String[]> useParentClass(ExecutableElement annotatedMethod, MethodRef mr) {
-    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
-    ExecutableElement valueMethod = assertNonNull(
-        ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
-            .filter(ee -> ee.getSimpleName().contentEquals("value"))
-            .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
-            .findAny()
-            .orElse(null))
-                .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
-    getClassAndMethod = (e, am) -> {
+    ExecutableElement valueMethod = assertParentDefine(annotatedMethod, parentClass);
+    return (e, am) -> {
       Element enclosingElement = e.getEnclosingElement();
       AnnotationMirror defaultAnnotation = assertNonNull(getAnnotationMirror(enclosingElement, parentClass).orElse(null))
           .todo(() -> {
@@ -189,11 +179,9 @@ public class MethodRefProcessor extends XAbstractProcessor {
           elements.getElementValuesWithDefaults(defaultAnnotation).get(valueMethod).getValue().toString(),
           elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
     };
-    return getClassAndMethod;
   }
 
   private BiFunction<Element, AnnotationMirror, String[]> useClassAndMethod(TypeElement annotatedClass) {
-    BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     assertThat(visitedClassAndMethod.add(annotatedClass))
         .todo(() -> debug().log("This annotation has been visisted: " + annotatedClass));
     ExecutableElement[] refMethods = ElementFilter.methodsIn(elements.getAllMembers(annotatedClass))
@@ -203,9 +191,9 @@ public class MethodRefProcessor extends XAbstractProcessor {
           if (methodRef == null) {
             return false;
           }
-          return methodRef.type() != Type.ALL &&
+          return methodRef.type() == Type.CLASS || (methodRef.type() == Type.METHOD &&
               types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::defaultClass), voidType) &&
-              types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType);
+              types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType));
         })
         .toArray(ExecutableElement[]::new);
     assertThat(refMethods.length == 2)
@@ -231,15 +219,34 @@ public class MethodRefProcessor extends XAbstractProcessor {
           annotatedClass);
       throw new AssertException();
     }
+    MethodRef mr = clazz.getAnnotation(MethodRef.class);
+    TypeMirror parentClass = getAnnotationClassValue(elements, mr, MethodRef::parentClass);
+    ExecutableElement parentValueMethod;
+    if (!types.isSameType(parentClass, methodRefType)) {
+      parentValueMethod = assertParentDefine(clazz, parentClass);
+    } else {
+      parentValueMethod = null;
+    }
     assertThat(types.isAssignable(clazz.getReturnType(), classType))
         .todo(() -> error().log("Method with @MethodRef(type=CLASS) must return Class", clazz));
-    getClassAndMethod = (e, am) -> {
+    return (e, am) -> {
       Map<? extends ExecutableElement, ? extends AnnotationValue> values = elements.getElementValuesWithDefaults(am);
+      String parentClzValue = null;
+      if (parentValueMethod != null) {
+        Element enclosingElement = e.getEnclosingElement();
+        Optional<AnnotationMirror> defaultAnnotation = getAnnotationMirror(enclosingElement, parentClass);
+        if (defaultAnnotation.isPresent()) {
+          parentClzValue = elements.getElementValuesWithDefaults(defaultAnnotation.get()).get(parentValueMethod).getValue().toString();
+        }
+      }
       String clzValue = values.get(clazz).getValue().toString();
+      if (clzValue.equals(void.class.getCanonicalName()) || clzValue.equals(Void.class.getCanonicalName())) {
+        assertNonNull(parentClzValue).todo(() -> error().log("Parent and itself both don't define a Class value.", e, am));
+        clzValue = parentClzValue;
+      }
       String methodValue = values.get(method).getValue().toString();
       return new String[] { clzValue, methodValue };
     };
-    return getClassAndMethod;
   }
 
   private void valid(TypeElement theAnnotation, BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod, RoundEnvironment roundEnv) {
@@ -247,24 +254,40 @@ public class MethodRefProcessor extends XAbstractProcessor {
     roundEnv.getElementsAnnotatedWith(theAnnotation).forEach(e -> handleAssert(() -> {
       AnnotationMirror anno = getAnnotationMirror(e, annoType).get();
       String[] pair = getClassAndMethod.apply(e, anno);
-      if (pair != null) {
-        TypeElement clz = elements.getTypeElement(pair[0]);
-        if (clz == null) {
-          try {
-            clz = elements.getTypeElement(Class.forName(pair[0]).getCanonicalName());
-          } catch (ClassNotFoundException e1) {
-            error().log("Can't find the given class: " + pair[0], e, anno);
-            return;
-          }
-        }
-        if (!elements.getAllMembers(clz)
-            .stream()
-            .filter(ExecutableElement.class::isInstance)
-            .map(Element::getSimpleName)
-            .anyMatch(n -> n.contentEquals(pair[1]))) {
-          error().log("Can't find the given method: " + pair[1] + " in " + pair[0], e, anno);
+      TypeElement clz = elements.getTypeElement(pair[0]);
+      if (clz == null) {
+        try {
+          clz = elements.getTypeElement(Class.forName(pair[0]).getCanonicalName());
+        } catch (ClassNotFoundException e1) {
+          error().log("Can't find the given class: " + pair[0], e, anno);
+          return;
         }
       }
+      if (!elements.getAllMembers(clz)
+          .stream()
+          .filter(ExecutableElement.class::isInstance)
+          .map(Element::getSimpleName)
+          .anyMatch(n -> n.contentEquals(pair[1]))) {
+        error().log("Can't find the given method: " + pair[1] + " in " + pair[0], e, anno);
+      }
     }));
+  }
+
+  /**
+   * Assert the parent class well defined.
+   *
+   * @param annotatedMethod the attribute annotated
+   * @param parentClass the parent class
+   * @return parentClass's value method if well defined
+   * @throws AssertException if not well defined.
+   */
+  private ExecutableElement assertParentDefine(ExecutableElement annotatedMethod, TypeMirror parentClass) throws AssertException {
+    return assertNonNull(
+        ElementFilter.methodsIn(types.asElement(parentClass).getEnclosedElements()).stream()
+            .filter(ee -> ee.getSimpleName().contentEquals("value"))
+            .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
+            .findAny()
+            .orElse(null))
+                .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
   }
 }

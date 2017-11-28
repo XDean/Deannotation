@@ -1,8 +1,11 @@
 package xdean.annotation.methodRef;
 
+import java.util.Map;
+
 import xdean.annotation.methodRef.UseParentClass.Parent;
 
 @Parent(GoldenUsage.class)
+@xdean.annotation.methodRef.UseTogether.Parent(Map.class)
 interface GoldenUsage {
   String METHOD = "isNaN";
 
@@ -20,4 +23,10 @@ interface GoldenUsage {
 
   @UseDefaultClass(method = "length")
   void e();
+
+  @UseTogether(value = "java.lang.String:length", method = "put", method3 = "subList")
+  void f();
+
+  @UseTogether(value = "java.lang.String:length", method = "put", type = void.class, method3 = "get")
+  void g();
 }

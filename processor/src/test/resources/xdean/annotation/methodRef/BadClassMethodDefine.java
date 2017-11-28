@@ -45,3 +45,13 @@ import xdean.annotation.MethodRef.Type;
   @MethodRef(type = Type.METHOD)
   String method2();
 }
+
+@Retention(SOURCE)
+@Target(METHOD)
+@interface DuplicateDefine {
+  @MethodRef(type = Type.METHOD)
+  String method();
+
+  @MethodRef(type = Type.METHOD)
+  String method2();
+}

@@ -5,6 +5,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.List;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
@@ -62,11 +63,11 @@ import xdean.annotation.MethodRef.Type;
   String method();
 
   @MethodRef(type = Type.METHOD, defaultClass = String.class)
-  String method2();
-
-  @MethodRef(type = Type.CLASS)
-  Class<? extends Number> type();
+  String method2() default "length";
 
   @MethodRef(type = Type.METHOD)
   String method3();
+
+  @MethodRef(type = Type.CLASS, parentClass = Parent.class)
+  Class<?> type() default List.class;
 }
