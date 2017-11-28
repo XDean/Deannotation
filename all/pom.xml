@@ -9,19 +9,19 @@
 	<parent>
 		<groupId>com.github.XDean</groupId>
 		<artifactId>Annotation-EX-parent</artifactId>
-		<version>${revision}</version>
+		<version>0.1.1</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.github.XDean</groupId>
 			<artifactId>Annotation-EX-api</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.XDean</groupId>
 			<artifactId>Annotation-EX-processor</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

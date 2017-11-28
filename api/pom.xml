@@ -9,6 +9,6 @@
 	<parent>
 		<groupId>com.github.XDean</groupId>
 		<artifactId>Annotation-EX-parent</artifactId>
-		<version>${revision}</version>
+		<version>0.1.1</version>
 	</parent>
 </project>
