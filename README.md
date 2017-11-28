@@ -9,14 +9,9 @@
 
 ```xml
 <dependency>
-  <groupId>com.github.XDean</groupId>
-  <artifactId>Annotation-EX-api</artifactId>
-  <version>0.1</version>
-</dependency>
-<dependency>
-  <groupId>com.github.XDean</groupId>
-  <artifactId>Annotation-EX-processor</artifactId>
-  <version>0.1</version>
+    <groupId>com.github.XDean</groupId>
+    <artifactId>Annotation-EX</artifactId>
+    <version>0.1.1</version>
 </dependency>
 ```
 
@@ -24,12 +19,16 @@ Or
 
 ```xml
 <dependency>
-    <groupId>com.github.XDean</groupId>
-    <artifactId>Annotation-EX</artifactId>
-    <version>0.1</version>
+  <groupId>com.github.XDean</groupId>
+  <artifactId>Annotation-EX-api</artifactId>
+  <version>0.1.1</version>
+</dependency>
+<dependency>
+  <groupId>com.github.XDean</groupId>
+  <artifactId>Annotation-EX-processor</artifactId>
+  <version>0.1.1</version>
 </dependency>
 ```
-<sup>0.1 not support this yet</sup>
 
 # Features
 - [@MethodRef](#methodref)
