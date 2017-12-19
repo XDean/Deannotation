@@ -139,6 +139,8 @@ public class MethodRefProcessor extends XAbstractProcessor {
     BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod;
     if (mr.type() == Type.ALL) {
       getClassAndMethod = useAll(annotatedMethod, mr);
+    } else if (mr.type() == Type.METHOD && mr.findInEnclosing()) {
+      getClassAndMethod = useEnclosing(annotatedMethod, mr);
     } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
       getClassAndMethod = useDefaultClass(annotatedMethod, mr);
     } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
@@ -148,6 +150,11 @@ public class MethodRefProcessor extends XAbstractProcessor {
     }
     valid(annotatedClass, getClassAndMethod, roundEnv);
     allMethodRefAnnotations.add(annotatedClass.getQualifiedName().toString());
+  }
+
+  private BiFunction<Element, AnnotationMirror, String[]> useEnclosing(ExecutableElement annotatedMethod, MethodRef mr) {
+    return (e, am) -> new String[] { e.getEnclosingElement().asType().toString(),
+        elements.getElementValuesWithDefaults(am).get(annotatedMethod).getValue().toString() };
   }
 
   private BiFunction<Element, AnnotationMirror, String[]> useAll(ExecutableElement annotatedMethod, MethodRef mr) {
@@ -195,6 +202,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
             return false;
           }
           return methodRef.type() == Type.CLASS || (methodRef.type() == Type.METHOD &&
+              methodRef.findInEnclosing() == false &&
               types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::defaultClass), voidType) &&
               types.isSameType(getAnnotationClassValue(elements, methodRef, MethodRef::parentClass), methodRefType));
         })

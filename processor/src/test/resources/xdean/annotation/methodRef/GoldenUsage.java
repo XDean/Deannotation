@@ -24,9 +24,12 @@ interface GoldenUsage {
   @UseDefaultClass(method = "length")
   void e();
 
-  @UseTogether(value = "java.lang.String:length", method = "put", method3 = "subList")
+  @UseEnclosing(method = "e")
   void f();
 
-  @UseTogether(value = "java.lang.String:length", method = "put", type = void.class, method3 = "get")
+  @UseTogether(value = "java.lang.String:length", method = "put", method3 = "e", method4 = "subList")
   void g();
+
+  @UseTogether(value = "java.lang.String:length", method = "put", method3 = "f", type = void.class, method4 = "get")
+  void h();
 }

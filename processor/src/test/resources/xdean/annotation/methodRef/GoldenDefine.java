@@ -1,23 +1,19 @@
 package xdean.annotation.methodRef;
 
 import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface UseAll {
   @MethodRef
   String value();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface UseClassAndMethod {
   @MethodRef(type = Type.CLASS)
@@ -27,17 +23,15 @@ import xdean.annotation.MethodRef.Type;
   String method();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface UseDefaultClass {
   @MethodRef(type = Type.METHOD, defaultClass = String.class)
   String method();
 }
 
-@Retention(SOURCE)
 @Target({ METHOD, TYPE })
 @interface UseParentClass {
-  @Retention(SOURCE)
+
   @Target({ TYPE, PACKAGE })
   @interface Parent {
     Class<?> value();
@@ -47,10 +41,15 @@ import xdean.annotation.MethodRef.Type;
   String method();
 }
 
-@Retention(SOURCE)
+@Target(METHOD)
+@interface UseEnclosing {
+  @MethodRef(type = Type.METHOD, findInEnclosing = true)
+  String method();
+}
+
 @Target({ METHOD, TYPE })
 @interface UseTogether {
-  @Retention(SOURCE)
+
   @Target({ TYPE, PACKAGE })
   @interface Parent {
     Class<?> value();
@@ -65,8 +64,11 @@ import xdean.annotation.MethodRef.Type;
   @MethodRef(type = Type.METHOD, defaultClass = String.class)
   String method2() default "length";
 
-  @MethodRef(type = Type.METHOD)
+  @MethodRef(type = Type.METHOD, findInEnclosing = true)
   String method3();
+
+  @MethodRef(type = Type.METHOD)
+  String method4();
 
   @MethodRef(type = Type.CLASS, parentClass = Parent.class)
   Class<?> type() default List.class;

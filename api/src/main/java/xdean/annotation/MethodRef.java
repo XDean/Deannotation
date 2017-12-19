@@ -170,4 +170,10 @@ public @interface MethodRef {
    * @return default class
    */
   Class<?> defaultClass() default void.class;
+
+  /**
+   * @see Type#METHOD
+   * @return if need find method in enclosing element
+   */
+  boolean findInEnclosing() default false;
 }

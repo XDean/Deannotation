@@ -88,6 +88,14 @@ public class MethodRefTest {
   }
 
   @Test
+  public void testBadEnclosingUsage() throws Exception {
+    Compilation compile = Compiler.javac()
+        .withProcessors(new MethodRefProcessor())
+        .compile(GOLDEN, getSource("BadEnclosingUsage.java"));
+    assertThat(compile).hadErrorCount(1);
+  }
+
+  @Test
   public void testBadDefaultUsage() throws Exception {
     Compilation compile = Compiler.javac()
         .withProcessors(new MethodRefProcessor())

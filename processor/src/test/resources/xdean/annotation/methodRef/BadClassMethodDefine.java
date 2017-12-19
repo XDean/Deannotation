@@ -1,29 +1,24 @@
 package xdean.annotation.methodRef;
 
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.SOURCE;
 
-import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface JustClass {
   @MethodRef(type = Type.CLASS)
   Class<? extends Number> type();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface JustMethod {
   @MethodRef(type = Type.METHOD)
   String method();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface OtherUse {
   @MethodRef(type = Type.CLASS)
@@ -33,7 +28,6 @@ import xdean.annotation.MethodRef.Type;
   String method();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface MoreDefine {
   @MethodRef(type = Type.CLASS)
@@ -46,7 +40,6 @@ import xdean.annotation.MethodRef.Type;
   String method2();
 }
 
-@Retention(SOURCE)
 @Target(METHOD)
 @interface DuplicateDefine {
   @MethodRef(type = Type.METHOD)
