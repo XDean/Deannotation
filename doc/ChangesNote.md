@@ -10,4 +10,4 @@
 - Use `AnnotationProcessorToolkit:0.1.2`
 
 # 0.1.2
-- `@MethodRef` test record file
+- `@MethodRef` support `findInEnclosing`
