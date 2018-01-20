@@ -14,15 +14,33 @@ import java.lang.reflect.Method;
 @Retention(SOURCE)
 @Target(TYPE)
 public @interface MetaInfo {
+  public enum AccessLevel {
+    PUBLIC,
+    /* MODULE, */
+    PROTECTED,
+    PACKAGE,
+    PRIVATE
+  }
+
   public enum MetaElement {
     FIELD,
     CONSTRUCTOR,
     METHOD,
-    PROPERTY,
+    PROPERTY
+  }
 
+  @Retention(SOURCE)
+  public @interface Element {
+    MetaElement value();
+
+    AccessLevel level();
   }
 
   String name() default "";
+
+  Element[] elements() default {
+
+  };
 
   public interface ReflectElement<T extends Member> {
     T reflect();
@@ -54,5 +72,13 @@ public @interface MetaInfo {
 
   public interface ConstructorInfo<T> extends ExecutableInfo<Constructor<T>> {
 
+  }
+
+  public interface ReadOnlyPropertyInfo {
+    MethodInfo getter();
+  }
+
+  public interface PropertyInfo extends ReadOnlyPropertyInfo {
+    MethodInfo setter();
   }
 }
