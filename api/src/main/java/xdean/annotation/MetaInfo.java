@@ -5,7 +5,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -24,26 +23,28 @@ public @interface MetaInfo {
 
   public enum MetaElement {
     FIELD,
-    CONSTRUCTOR,
+    /* CONSTRUCTOR, */
     METHOD,
-    PROPERTY
-  }
-
-  @Retention(SOURCE)
-  public @interface Element {
-    MetaElement value();
-
-    AccessLevel level();
+    PROPERTY,
+    ALL
   }
 
   String name() default "";
 
-  Element[] elements() default {
+  AccessLevel level() default AccessLevel.PRIVATE;
 
-  };
+  MetaElement[] elements() default MetaElement.ALL;
+
+  boolean inherit() default false;
+
+  boolean includeStatic() default false;
+
+  boolean holdReference() default false;
 
   public interface ReflectElement<T extends Member> {
     T reflect();
+
+    Class<?> declaringClass();
 
     default String name() {
       return reflect().getName();
@@ -58,27 +59,25 @@ public @interface MetaInfo {
     }
   }
 
-  public interface FieldInfo extends ReflectElement<Field> {
+  public interface FieldMeta extends ReflectElement<Field> {
+    default Class<?> type() {
+      return reflect().getType();
+    }
+  }
+
+  public interface ExecutableMeta<T extends Executable> extends ReflectElement<T> {
 
   }
 
-  public interface ExecutableInfo<T extends Executable> extends ReflectElement<T> {
+  public interface MethodMeta extends ExecutableMeta<Method> {
 
   }
 
-  public interface MethodInfo extends ExecutableInfo<Method> {
-
+  public interface ReadOnlyPropertyMeta {
+    MethodMeta getter();
   }
 
-  public interface ConstructorInfo<T> extends ExecutableInfo<Constructor<T>> {
-
-  }
-
-  public interface ReadOnlyPropertyInfo {
-    MethodInfo getter();
-  }
-
-  public interface PropertyInfo extends ReadOnlyPropertyInfo {
-    MethodInfo setter();
+  public interface PropertyMeta extends ReadOnlyPropertyMeta {
+    MethodMeta setter();
   }
 }
