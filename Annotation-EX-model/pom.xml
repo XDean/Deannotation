@@ -10,7 +10,14 @@
 		<artifactId>Annotation-EX-parent</artifactId>
 		<version>0.1.2</version>
 	</parent>
-
+	<dependencies>
+		<dependency>
+			<groupId>com.github.XDean</groupId>
+			<artifactId>Annotation-EX-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
