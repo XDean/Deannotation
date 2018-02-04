@@ -2,10 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.XDean</groupId>
-	<artifactId>Annotation-EX-parent</artifactId>
+	<artifactId>deannotation-parent</artifactId>
 	<version>0.1.2</version>
 	<packaging>pom</packaging>
-	<name>Annotation-EX-parent</name>
+	<name>deannotation-parent</name>
 	<description>Java Annotation Extension Parent</description>
 	<url>https://github.com/XDean/Annotation-EX</url>
 
@@ -17,10 +17,8 @@
 	</properties>
 
 	<modules>
-		<module>api/</module>
-		<module>processor/</module>
-		<module>all/</module>
 		<module>aggregation</module>
+		<module>method-reference</module>
 	</modules>
 
 	<developers>

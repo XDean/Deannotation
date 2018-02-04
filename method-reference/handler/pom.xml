@@ -1,16 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>Annotation-EX-processor</artifactId>
-	<name>Annotation-EX Processor</name>
-	<description>Java Annotation Extension Processors</description>
-	<url>https://github.com/XDean/Annotation-EX</url>
-
 	<parent>
 		<groupId>com.github.XDean</groupId>
-		<artifactId>Annotation-EX-parent</artifactId>
+		<artifactId>deannotation-methodReference-parent</artifactId>
 		<version>0.1.2</version>
 	</parent>
+	<artifactId>deannotation-methodReference-handler</artifactId>
+
 
 	<dependencyManagement>
 		<dependencies>
@@ -25,7 +22,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.github.XDean</groupId>
-			<artifactId>Annotation-EX-api</artifactId>
+			<artifactId>deannotation-methodReference-api</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>

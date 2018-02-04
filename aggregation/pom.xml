@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>Annotation-EX-aggregation</artifactId>
+	<artifactId>deannotation-aggregation</artifactId>
 	<name>Annotation-Aggregation</name>
 	<description>Annotation Aggregation</description>
-	<url>https://github.com/XDean/Annotation-EX</url>
+	<url>https://github.com/XDean/Deannotation</url>
 
 	<parent>
 		<groupId>com.github.XDean</groupId>
-		<artifactId>Annotation-EX-parent</artifactId>
+		<artifactId>deannotation-parent</artifactId>
 		<version>0.1.2</version>
 	</parent>
 
