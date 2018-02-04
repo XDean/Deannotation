@@ -18,9 +18,9 @@
 
 	<modules>
 		<module>api/</module>
+    <module>model/</module>
 		<module>processor/</module>
 		<module>all/</module>
-		<module>Annotation-EX-model</module>
 	</modules>
 
 	<developers>

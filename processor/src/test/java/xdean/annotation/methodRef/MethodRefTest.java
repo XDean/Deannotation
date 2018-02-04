@@ -27,7 +27,7 @@ public class MethodRefTest {
         .withProcessors(new MethodRefProcessor())
         .compile(GOLDEN);
     assertThat(compile).succeededWithoutWarnings();
-    // TODO: add content compare, https://github.com/google/compile-testing/issues/139
+    // XXX: add content compare, https://github.com/google/compile-testing/issues/139
     assertThat(compile).generatedFile(StandardLocation.CLASS_OUTPUT, RECORD_FILE);
   }
 
