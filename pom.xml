@@ -20,6 +20,7 @@
 		<module>api/</module>
 		<module>processor/</module>
 		<module>all/</module>
+		<module>aggregation</module>
 	</modules>
 
 	<developers>
