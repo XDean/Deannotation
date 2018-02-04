@@ -43,8 +43,12 @@ public class AggregationHandler {
   private static <T> Class<?> getAggregationClass(Class<T> clz) {
     try {
       return clz.getClassLoader().loadClass(AGGREGATION);
-    } catch (ClassNotFoundException e) {
-      throw new Error(e);
+    } catch (NullPointerException | ClassNotFoundException e) {
+      try {
+        return AggregationHandler.class.getClassLoader().loadClass(AGGREGATION);
+      } catch (ClassNotFoundException e1) {
+        throw new Error(e1);
+      }
     }
   }
 

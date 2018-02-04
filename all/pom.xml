@@ -18,10 +18,15 @@
 			<artifactId>Annotation-EX-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.github.XDean</groupId>
-			<artifactId>Annotation-EX-processor</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+    <dependency>
+      <groupId>com.github.XDean</groupId>
+      <artifactId>Annotation-EX-processor</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.XDean</groupId>
+      <artifactId>Annotation-EX-aggregation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 	</dependencies>
 </project>
