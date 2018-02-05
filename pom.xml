@@ -2,10 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.XDean</groupId>
-	<artifactId>Annotation-EX-parent</artifactId>
+	<artifactId>deannotation-parent</artifactId>
 	<version>0.1.2</version>
 	<packaging>pom</packaging>
-	<name>Annotation-EX-parent</name>
+	<name>deannotation-parent</name>
 	<description>Java Annotation Extension Parent</description>
 	<url>https://github.com/XDean/Annotation-EX</url>
 
@@ -17,10 +17,8 @@
 	</properties>
 
 	<modules>
-		<module>api/</module>
-    <module>model/</module>
-		<module>processor/</module>
-		<module>all/</module>
+		<module>aggregation</module>
+		<module>method-reference</module>
 	</modules>
 
 	<developers>
@@ -56,6 +54,65 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.github.XDean</groupId>
+				<artifactId>Java-EX</artifactId>
+				<version>0.0.7</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.google.auto.service</groupId>
+				<artifactId>auto-service</artifactId>
+				<version>1.0-rc3</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.github.XDean</groupId>
+				<artifactId>AnnotationProcessorToolkit</artifactId>
+				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.testing.compile</groupId>
+				<artifactId>compile-testing</artifactId>
+				<version>0.13</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.7.201606060606</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>test</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 	<profiles>
 		<profile>
