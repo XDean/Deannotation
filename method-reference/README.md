@@ -119,4 +119,4 @@ class Bar{
 ```
 
 ## Eclipse snapshot
-![eclipse-use-methodref](doc/snapshot/eclipse-use-methodref.jpg)
+![eclipse-use-methodref](../doc/snapshot/eclipse-use-methodref.jpg)
