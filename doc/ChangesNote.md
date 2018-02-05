@@ -11,3 +11,6 @@
 
 # 0.1.2
 - `@MethodRef` support `findInEnclosing`
+
+#0.2
+- import `@Aggregation`

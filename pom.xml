@@ -7,7 +7,7 @@
 	<packaging>pom</packaging>
 	<name>deannotation-parent</name>
 	<description>Java Annotation Extension Parent</description>
-	<url>https://github.com/XDean/Annotation-EX</url>
+	<url>https://github.com/XDean/Deannotation</url>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -32,7 +32,7 @@
 
 	<issueManagement>
 		<system>Github Issue</system>
-		<url>https://github.com/XDean/Annotation-EX/issues</url>
+		<url>https://github.com/XDean/Deannotation/issues</url>
 	</issueManagement>
 
 	<licenses>
@@ -43,9 +43,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git@github.com:XDean/Annotation-EX.git</connection>
-		<developerConnection>scm:git@github.com:XDean/Annotation-EX.git</developerConnection>
-		<url>git@github.com:XDean/Annotation-EX.git</url>
+		<connection>scm:git@github.com:XDean/Deannotation.git</connection>
+		<developerConnection>scm:git@github.com:XDean/Deannotation.git</developerConnection>
+		<url>git@github.com:XDean/Deannotation.git</url>
 	</scm>
 
 	<distributionManagement>
