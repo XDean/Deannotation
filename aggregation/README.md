@@ -1,16 +1,16 @@
 # @Aggregation
-Since 0.2
-
+Since 0.2<br>
 <sub>**Not support java9**</sub>
 
 ## Goal
 Aggregate multiple annotations as one.
 
-Also see [this question](https://stackoverflow.com/questions/33345605/java-custom-annotation-aggregate-multiple-annotations)
+Also see [this question](https://stackoverflow.com/questions/26910008/grouping-multiple-annotations)
 
 ## Usage
 
-For instance, there is [a spring application](http://projects.spring.io/spring-framework/#quick-start):
+For instance, there is [a spring application](http://projects.spring.io/spring-framework/#quick-start):<br>
+<sub>Since Spring can handle its [meta-annotations](https://docs.spring.io/spring/docs/5.0.0.RELEASE/spring-framework-reference/core.html#beans-meta-annotations), This is just an example</sub>
 
 ```java
 @Configuration

@@ -1,38 +1,15 @@
 # Deannotation
-[![Build Status](https://travis-ci.org/XDean/Annotation-EX.svg?branch=master)](https://travis-ci.org/XDean/Annotation-EX)
-[![codecov.io](http://codecov.io/github/XDean/Annotation-EX/coverage.svg?branch=master)](https://codecov.io/gh/XDean/Annotation-EX/branch/master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Annotation-EX/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Annotation-EX)
+[![Build Status](https://travis-ci.org/XDean/Deannotation.svg?branch=master)](https://travis-ci.org/XDean/Deannotation)
+[![codecov.io](http://codecov.io/github/XDean/Deannotation/coverage.svg?branch=master)](https://codecov.io/gh/XDean/Deannotation/branch/master)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Deannotation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Deannotation)
 
 # Release
 
-**maven**
-
-```xml
-<dependency>
-    <groupId>com.github.XDean</groupId>
-    <artifactId>Annotation-EX</artifactId>
-    <version>0.1.2</version>
-</dependency>
-```
-
-Or
-
-```xml
-<dependency>
-  <groupId>com.github.XDean</groupId>
-  <artifactId>Annotation-EX-api</artifactId>
-  <version>0.1.2</version>
-</dependency>
-<dependency>
-  <groupId>com.github.XDean</groupId>
-  <artifactId>Annotation-EX-processor</artifactId>
-  <version>0.1.2</version>
-</dependency>
-```
+See in each module.
 
 # Features
-- [@MethodRef](method-reference/README.md)
-- [@Aggregation](aggregation/README.md)
+- [@MethodRef](method-reference)
+- [@Aggregation](aggregation)
 - [Use in Eclipse](#use-in-eclipse)
 - [Version changes](doc/ChangesNote.md)
 
