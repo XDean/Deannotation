@@ -1,38 +1,30 @@
 package xdean.annotation.handler;
 
-import static xdean.jex.util.reflect.AnnotationUtil.addAnnotation;
-import static xdean.jex.util.reflect.AnnotationUtil.copyAnnotation;
-import static xdean.jex.util.reflect.AnnotationUtil.createAnnotationFromMap;
+import static xdean.jex.util.reflect.AnnotationUtil.*;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class AggregationHandler {
-  private static final String AGGREGATION = "xdean.annotation.Aggregation";
+import xdean.annotation.Aggregation;
 
+public class AggregationHandler {
   @interface Generated {
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Class<T> handle(Class<T> clz) {
-    if (clz.getName().startsWith("java.") ||
-        clz.getName().startsWith("sun.") ||
-        clz.getName().equals(AGGREGATION) ||
-        clz.isAnnotationPresent(Generated.class)) {
+    if (clz.isAnnotationPresent(Generated.class)) {
       return clz;
     }
-    Class<? extends Annotation> aggrClass = (Class<? extends Annotation>) getAggregationClass(clz);
-    return byReflect(clz, aggrClass);
+    return byReflect(clz);
   }
 
-  private static <T> Class<T> byReflect(Class<T> clz, Class<? extends Annotation> aggrClass) {
+  private static <T> Class<T> byReflect(Class<T> clz) {
     Arrays.stream(clz.getAnnotations())
-        .filter(a -> a.annotationType().isAnnotationPresent(aggrClass))
+        .filter(a -> a.annotationType().isAnnotationPresent(Aggregation.class))
         .forEach(a -> {
-          Annotation aggr = a.annotationType().getAnnotation(aggrClass);
-          Class<?> template = getTemplate(aggr);
+          Aggregation aggr = a.annotationType().getAnnotation(Aggregation.class);
+          Class<?> template = aggr.template();
           Annotation[] annotations = template.getAnnotations();
           Arrays.stream(annotations).forEach(anno -> addAnnotation(clz, copyAnnotation(anno)));
         });
@@ -40,24 +32,9 @@ public class AggregationHandler {
     return clz;
   }
 
-  private static <T> Class<?> getAggregationClass(Class<T> clz) {
-    try {
-      return clz.getClassLoader().loadClass(AGGREGATION);
-    } catch (NullPointerException | ClassNotFoundException e) {
-      try {
-        return AggregationHandler.class.getClassLoader().loadClass(AGGREGATION);
-      } catch (ClassNotFoundException e1) {
-        throw new Error(e1);
-      }
-    }
-  }
-
-  private static Class<?> getTemplate(Annotation aggr) {
-    try {
-      return (Class<?>) aggr.getClass().getMethod("template").invoke(aggr);
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-        | SecurityException e) {
-      throw new Error(e);
-    }
+  // TODO
+  @SuppressWarnings("unused")
+  private static <T> Class<T> byByteCode(Class<T> clz) {
+    return clz;
   }
 }

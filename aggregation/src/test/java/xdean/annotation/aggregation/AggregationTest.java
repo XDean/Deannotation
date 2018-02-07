@@ -39,7 +39,6 @@ public class AggregationTest {
     Object b = use.getAnnotation(bClass);
     assertNotNull(b);
     assertEquals(123, b.getClass().getMethod("value").invoke(b));
-    aggregationLoader.close();
   }
 
   @Retention(RUNTIME)
