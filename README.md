@@ -32,6 +32,7 @@ Or
 
 # Features
 - [@MethodRef](method-reference/README.md)
+- [@Aggregation](aggregation/README.md)
 - [Use in Eclipse](#use-in-eclipse)
 - [Version changes](doc/ChangesNote.md)
 
