@@ -1,5 +1,6 @@
 # @Aggregation
 Since 0.2
+
 <sub>**Not support java9**</sub>
 
 ## Goal
@@ -34,7 +35,7 @@ public @interface ScanConfig {
 }
 ```
 
-then use the annotation on the application instead of the original two:
+Then use the annotation on the application instead of the original two:
 
 ```java
 @ScanConfig
