@@ -46,14 +46,14 @@ public class SpringApplication {
 
 But above is not enough, you have two choices to  expand the aggregated annotations:
 
-1. Use `AggregationHandler.handle` before use the class:
+1. Use `AggregationReflectHandler.expand` before use the class:
 
 ```java
-Class<SpringApplication> clz = AggregationHandler.handle(SpringApplication.class);
+Class<SpringApplication> clz = AggregationReflectHandler.expand(SpringApplication.class);
 ApplicationContext context = new AnnotationConfigApplicationContext(clz);
 ```
 
-2. Use `AggregationLoader` to load the class. For example, you can set the default class loader by set property `-Djava.system.class.loader=xdean.annotation.handler.AggregationLoader`. 
+2. Use `AggregationClassLoader` to load the class. For example, you can set the default class loader by set property `-Djava.system.class.loader=xdean.annotation.handler.AggregationClassLoader`. Note if you use this way, add the optional  `javassist` to your dependencies.
 
 Finally, we can run our application:
 
