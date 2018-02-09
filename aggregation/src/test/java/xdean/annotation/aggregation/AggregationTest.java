@@ -11,13 +11,13 @@ import java.lang.annotation.Target;
 import org.junit.Test;
 
 import xdean.annotation.Aggregation;
-import xdean.annotation.handler.AggregationHandler;
-import xdean.annotation.handler.AggregationLoader;
+import xdean.annotation.handler.AggregationReflectHandler;
+import xdean.annotation.handler.AggregationClassLoader;
 
 public class AggregationTest {
   @Test
   public void test() throws Exception {
-    AggregationHandler.handle(Use.class);
+    AggregationReflectHandler.expand(Use.class);
     A a = Use.class.getAnnotation(A.class);
     assertNotNull(a);
     assertEquals("aa", a.value());
@@ -29,7 +29,7 @@ public class AggregationTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testClassLoader() throws Exception {
-    AggregationLoader aggregationLoader = new AggregationLoader(this.getClass().getClassLoader());
+    AggregationClassLoader aggregationLoader = new AggregationClassLoader(this.getClass().getClassLoader());
     Class<?> use = aggregationLoader.loadClass(Use.class.getName());
     Class<? extends Annotation> aClass = (Class<? extends Annotation>) aggregationLoader.loadClass(A.class.getName());
     Class<? extends Annotation> bClass = (Class<? extends Annotation>) aggregationLoader.loadClass(B.class.getName());
