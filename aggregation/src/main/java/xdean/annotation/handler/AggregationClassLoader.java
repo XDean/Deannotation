@@ -154,7 +154,7 @@ public class AggregationClassLoader extends ClassLoader {
     } else if (type == Float.class) {
       return new FloatMemberValue((Float) value, pool);
     } else if (type == Integer.class) {
-      return new IntegerMemberValue((Integer) value, pool);
+      return new IntegerMemberValue(pool, (Integer) value);
     } else if (type == Long.class) {
       return new LongMemberValue((Long) value, pool);
     } else if (type == Short.class) {
