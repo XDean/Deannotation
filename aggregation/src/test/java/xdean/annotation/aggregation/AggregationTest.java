@@ -11,8 +11,10 @@ import java.lang.annotation.Target;
 import org.junit.Test;
 
 import xdean.annotation.Aggregation;
-import xdean.annotation.handler.AggregationReflectHandler;
+import xdean.annotation.Aggregation.Attribute;
+import xdean.annotation.aggregation.AggregationTest.C.Template;
 import xdean.annotation.handler.AggregationClassLoader;
+import xdean.annotation.handler.AggregationReflectHandler;
 
 public class AggregationTest {
   @Test
@@ -41,6 +43,17 @@ public class AggregationTest {
     assertEquals(123, b.getClass().getMethod("value").invoke(b));
   }
 
+  @Test
+  public void testAttribute() throws Exception {
+    AggregationReflectHandler.expand(UseAttribute.class);
+    A a = UseAttribute.class.getAnnotation(A.class);
+    assertNotNull(a);
+    assertEquals("bb", a.value());
+    B b = UseAttribute.class.getAnnotation(B.class);
+    assertNotNull(b);
+    assertEquals(321, b.value());
+  }
+
   @Retention(RUNTIME)
   @Target(TYPE)
   public @interface A {
@@ -57,16 +70,25 @@ public class AggregationTest {
   @Retention(RUNTIME)
   @Target(TYPE)
   public @interface C {
+    @A("aa")
+    @B(123)
+    public static class Template {
+    }
 
-  }
+    @Attribute(type = A.class)
+    String a() default "aa";
 
-  @A("aa")
-  @B(123)
-  public static class Template {
+    @Attribute(type = B.class)
+    int b() default 123;
   }
 
   @C
   public static class Use {
+
+  }
+
+  @C(a = "bb", b = 321)
+  public static class UseAttribute {
 
   }
 }
