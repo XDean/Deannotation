@@ -28,8 +28,8 @@ public class AggregationTest {
     assertEquals(123, b.value());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
+  @SuppressWarnings("unchecked")
   public void testClassLoader() throws Exception {
     AggregationClassLoader aggregationLoader = new AggregationClassLoader(this.getClass().getClassLoader());
     Class<?> use = aggregationLoader.loadClass(Use.class.getName());
@@ -52,6 +52,21 @@ public class AggregationTest {
     B b = UseAttribute.class.getAnnotation(B.class);
     assertNotNull(b);
     assertEquals(321, b.value());
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testAttributeClassLoader() throws Exception {
+    AggregationClassLoader aggregationLoader = new AggregationClassLoader(this.getClass().getClassLoader());
+    Class<?> use = aggregationLoader.loadClass(UseAttribute.class.getName());
+    Class<? extends Annotation> aClass = (Class<? extends Annotation>) aggregationLoader.loadClass(A.class.getName());
+    Class<? extends Annotation> bClass = (Class<? extends Annotation>) aggregationLoader.loadClass(B.class.getName());
+    Object a = use.getAnnotation(aClass);
+    assertNotNull(a);
+    assertEquals("bb", a.getClass().getMethod("value").invoke(a));
+    Object b = use.getAnnotation(bClass);
+    assertNotNull(b);
+    assertEquals(321, b.getClass().getMethod("value").invoke(b));
   }
 
   @Retention(RUNTIME)

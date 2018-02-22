@@ -1,11 +1,12 @@
 package xdean.annotation.handler;
 
-import static xdean.jex.util.lang.ExceptionUtil.uncheck;
+import static xdean.jex.util.lang.ExceptionUtil.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,6 +38,8 @@ import javassist.bytecode.annotation.MemberValue;
 import javassist.bytecode.annotation.ShortMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
 import xdean.annotation.Aggregation;
+import xdean.annotation.Aggregation.Attribute;
+import xdean.jex.util.log.LogUtil;
 
 /**
  * ClassLoader to expand {@link Aggregation}
@@ -73,8 +76,6 @@ public class AggregationClassLoader extends ClassLoader {
       } else {
         loadClass = preLoad;
       }
-      // loadClass = delegate.loadClass(name);
-      // AggregationHandler.byReflect(loadClass);
       handling.set(false);
     }
     return loadClass;
@@ -107,12 +108,12 @@ public class AggregationClassLoader extends ClassLoader {
       }
       ClassFile cf = cc.getClassFile();
       ConstPool constPool = cf.getConstPool();
-      AnnotationsAttribute aa = (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag);
-      aggrList.forEach(a -> {
-        aa.removeAnnotation(a.annotationType().getName());
-        Class<?> template = a.annotationType().getAnnotation(Aggregation.class).template();
+      AnnotationsAttribute annotationAttr = (AnnotationsAttribute) cf.getAttribute(AnnotationsAttribute.visibleTag);
+      aggrList.forEach(aggregatedAnnotation -> {
+        annotationAttr.removeAnnotation(aggregatedAnnotation.annotationType().getName());
+        Class<?> template = aggregatedAnnotation.annotationType().getAnnotation(Aggregation.class).template();
         Arrays.stream(template.getAnnotations())
-            .forEach(expandAnnotation -> aa.addAnnotation(toJavassistAnnotation(constPool, expandAnnotation)));
+            .forEach(annotation -> annotationAttr.addAnnotation(processAttribute(constPool, annotation, aggregatedAnnotation)));
       });
       return cc.toClass(this, null);
     } catch (NotFoundException | CannotCompileException e) {
@@ -174,6 +175,27 @@ public class AggregationClassLoader extends ClassLoader {
         .filter(m -> m.getParameterCount() == 0)
         .filter(m -> !Modifier.isStatic(m.getModifiers()))
         .forEach(m -> uncheck(() -> result.addMemberValue(m.getName(), toMemberValue(pool, m.invoke(anno)))));
+    return result;
+  }
+
+  private static javassist.bytecode.annotation.Annotation processAttribute(ConstPool pool,
+      Annotation anno, Annotation define) {
+    Class<? extends Annotation> targetType = anno.annotationType();
+    javassist.bytecode.annotation.Annotation result = toJavassistAnnotation(pool, anno);
+    for (Method m : define.annotationType().getDeclaredMethods()) {
+      Attribute att = m.getAnnotation(Attribute.class);
+      if (att == null || att.type() != targetType) {
+        continue;
+      }
+      String name = att.name();
+      Method targetMethod = uncatch(() -> targetType.getDeclaredMethod(name));
+      if (targetMethod == null) {
+        LogUtil.warning().log(String.format("Attribute %s not found in %s", name, targetType));
+        continue;
+      }
+      Object value = uncheck(() -> m.invoke(define));
+      result.addMemberValue(name, toMemberValue(pool, value));
+    }
     return result;
   }
 
