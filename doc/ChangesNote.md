@@ -17,4 +17,4 @@
 
 # 0.2.2
  -TODO allow add attribute by `@Attribute` on `@Aggregation`
- -TODO 
+ -TODO add compile checker for `@Aggregation`
