@@ -40,7 +40,7 @@ import xdean.annotation.Aggregation;
 
 /**
  * ClassLoader to expand {@link Aggregation}
- * 
+ *
  * @author XDean
  *
  */
@@ -73,8 +73,6 @@ public class AggregationClassLoader extends ClassLoader {
       } else {
         loadClass = preLoad;
       }
-      // loadClass = delegate.loadClass(name);
-      // AggregationHandler.byReflect(loadClass);
       handling.set(false);
     }
     return loadClass;
@@ -90,7 +88,7 @@ public class AggregationClassLoader extends ClassLoader {
   }
 
   /**
-   * @param preLoadClass the class pre-load by {@link #wrapWorldClassLoader}
+   * @param preLoadClass the class pre-load by {@link #WrapWorldClassLoader}
    */
   @SuppressWarnings("unchecked")
   private <T> Class<T> expand(Class<T> preLoadClass) throws ClassNotFoundException {

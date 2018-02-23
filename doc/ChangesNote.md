@@ -12,5 +12,9 @@
 # 0.1.2
 - `@MethodRef` support `findInEnclosing`
 
-#0.2
+# 0.2.1
 - import `@Aggregation`
+
+# 0.2.2
+ -TODO allow add attribute by `@Attribute` on `@Aggregation`
+ -TODO 

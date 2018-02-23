@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.github.XDean</groupId>
     <artifactId>deannotation-methodReference-parent</artifactId>
-    <version>0.2</version>
+    <version>0.2.2</version>
   </parent>
   <artifactId>deannotation-methodReference-api</artifactId>
 </project>
