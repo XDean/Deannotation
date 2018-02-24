@@ -33,9 +33,7 @@ public class AggregationReflectHandler {
       }
       Arrays.stream(clz.getAnnotations())
           .filter(a -> a.annotationType().isAnnotationPresent(Aggregation.class))
-          .forEach(a -> {
-            processAnnotation(a);
-          });
+          .forEach(a -> processAnnotation(a));
       processedMarker();
       return clz;
     }
