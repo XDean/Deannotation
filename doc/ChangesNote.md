@@ -16,5 +16,7 @@
 - import `@Aggregation`
 
 # 0.2.2
- -TODO allow add attribute by `@Attribute` on `@Aggregation`
- -TODO add compile checker for `@Aggregation`
+ - `@Aggregation`
+   - allow add attribute by `@Attribute`
+   - > add compile checker
+   - > Handle nested situation
