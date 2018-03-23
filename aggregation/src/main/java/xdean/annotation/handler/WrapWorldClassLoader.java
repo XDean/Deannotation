@@ -14,9 +14,10 @@ import xdean.annotation.Aggregation;
 import xdean.jex.util.log.Logable;
 
 /**
- * This class loader load class in wrap world which will never has effect to the application. If a class need expand the
- * aggregation annotations, this loader will load it to give a template to do bytecode changes.
- * 
+ * This class loader load class in wrap world which will never has effect to the application. If a
+ * class need expand the aggregation annotations, this loader will load it to give a template to do
+ * bytecode changes.
+ *
  * @author XDean
  *
  */
@@ -27,7 +28,10 @@ class WrapWorldClassLoader extends ClassLoader implements Logable {
 
   @Override
   protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-    Class<?> clz = null;
+    Class<?> clz = findLoadedClass(name);
+    if (clz != null) {
+      return clz;
+    }
     try {
       if (!name.startsWith("java.lang")) {
         CtClass cc = ClassPool.getDefault().get(name);

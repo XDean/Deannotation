@@ -65,7 +65,10 @@ public class AggregationClassLoader extends ClassLoader {
 
   @Override
   public Class<?> loadClass(String name) throws ClassNotFoundException {
-    Class<?> loadClass;
+    Class<?> loadClass = findLoadedClass(name);
+    if (loadClass != null) {
+      return loadClass;
+    }
     if (handling.get()) {
       loadClass = delegate.loadClass(name);
     } else {

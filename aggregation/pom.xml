@@ -5,6 +5,7 @@
 	<name>Annotation-Aggregation</name>
 	<description>Annotation Aggregation</description>
 	<url>https://github.com/XDean/Deannotation</url>
+    <version>0.2.3</version>
 
 	<parent>
 		<groupId>com.github.XDean</groupId>
