@@ -11,7 +11,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import xdean.annotation.Aggregation;
-import xdean.jex.util.log.Logable;
+import xdean.jex.log.Logable;
 
 /**
  * This class loader load class in wrap world which will never has effect to the application. If a
@@ -37,13 +37,13 @@ class WrapWorldClassLoader extends ClassLoader implements Logable {
         CtClass cc = ClassPool.getDefault().get(name);
         if (hasAggregation(cc)) {
           clz = cc.toClass(this, null);
-          debug().log("Load in wrap world: " + name);
+          debug("Load in wrap world: " + name);
         }
       }
     } catch (NotFoundException e) {
-      debug().log("Wrap world can't find " + name);
+      debug("Wrap world can't find " + name);
     } catch (CannotCompileException e) {
-      debug().log("Wrap world can't compile " + name);
+      debug("Wrap world can't compile " + name);
     }
     if (clz == null) {
       clz = getParent().loadClass(name);

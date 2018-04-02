@@ -1,7 +1,11 @@
 package xdean.annotation.handler;
 
-import static xdean.jex.util.lang.ExceptionUtil.*;
-import static xdean.jex.util.reflect.AnnotationUtil.*;
+import static xdean.jex.util.lang.ExceptionUtil.uncatch;
+import static xdean.jex.util.lang.ExceptionUtil.uncheck;
+import static xdean.jex.util.reflect.AnnotationUtil.addAnnotation;
+import static xdean.jex.util.reflect.AnnotationUtil.changeAnnotationValue;
+import static xdean.jex.util.reflect.AnnotationUtil.copyAnnotation;
+import static xdean.jex.util.reflect.AnnotationUtil.createAnnotationFromMap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -10,7 +14,7 @@ import java.util.Collections;
 
 import xdean.annotation.Aggregation;
 import xdean.annotation.Aggregation.Attribute;
-import xdean.jex.util.log.Logable;
+import xdean.jex.log.Logable;
 
 public class AggregationReflectHandler {
   @interface Processed {
@@ -57,7 +61,7 @@ public class AggregationReflectHandler {
         String name = att.name();
         Method targetMethod = uncatch(() -> targetType.getDeclaredMethod(name));
         if (targetMethod == null) {
-          warning().log(String.format("Attribute %s not found in %s", name, targetType));
+          warn(String.format("Attribute %s not found in %s", name, targetType));
           continue;
         }
         Object value = uncheck(() -> m.invoke(define));

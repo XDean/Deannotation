@@ -1,6 +1,7 @@
 package xdean.annotation.handler;
 
-import static xdean.jex.util.lang.ExceptionUtil.*;
+import static xdean.jex.util.lang.ExceptionUtil.uncatch;
+import static xdean.jex.util.lang.ExceptionUtil.uncheck;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +40,7 @@ import javassist.bytecode.annotation.ShortMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
 import xdean.annotation.Aggregation;
 import xdean.annotation.Aggregation.Attribute;
-import xdean.jex.util.log.LogUtil;
+import xdean.jex.log.LogFactory;
 
 /**
  * ClassLoader to expand {@link Aggregation}
@@ -193,7 +194,7 @@ public class AggregationClassLoader extends ClassLoader {
       String name = att.name();
       Method targetMethod = uncatch(() -> targetType.getDeclaredMethod(name));
       if (targetMethod == null) {
-        LogUtil.warning().log(String.format("Attribute %s not found in %s", name, targetType));
+        LogFactory.from(AggregationClassLoader.class).warn(String.format("Attribute %s not found in %s", name, targetType));
         continue;
       }
       Object value = uncheck(() -> m.invoke(define));
