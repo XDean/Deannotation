@@ -1,0 +1,3 @@
+[submodule "auto-message"]
+    path = auto-message
+    url = https://github.com/XDean/auto-message
