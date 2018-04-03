@@ -1,4 +1,6 @@
 # `@Aggregation`
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/deannotation-aggregation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/deannotation-aggregation)
+
 Since 0.2<br>
 <sub>**Not support java9**</sub>
 

@@ -1,7 +1,6 @@
 # Deannotation
 [![Build Status](https://travis-ci.org/XDean/Deannotation.svg?branch=master)](https://travis-ci.org/XDean/Deannotation)
 [![codecov.io](http://codecov.io/github/XDean/Deannotation/coverage.svg?branch=master)](https://codecov.io/gh/XDean/Deannotation/branch/master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Deannotation/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.XDean/Deannotation)
 
 # Release
 
