@@ -10,6 +10,7 @@ See in each module.
 # Features
 - [@MethodRef](method-reference)
 - [@Aggregation](aggregation)
+- [@AutoMessage](https://github.com/XDean/auto-message)
 - [Use in Eclipse](#use-in-eclipse)
 - [Version changes](doc/ChangesNote.md)
 
