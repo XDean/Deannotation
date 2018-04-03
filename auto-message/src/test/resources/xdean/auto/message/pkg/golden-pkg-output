@@ -1,0 +1,16 @@
+package xdean.auto.message.pkg;
+
+import java.lang.String;
+import javax.annotation.Generated;
+
+@Generated("xdean.auto.message.AutoMessageProcessor")
+public interface Msg {
+  String PKG_HELLO = "pkg.hello";
+
+  String PKG_HELLO_WORLD = "pkg.hello.world";
+
+  String PKG_GREETING_HEADER = "pkg.greeting.header";
+
+  String PKG_GREETING_CONTENT = "pkg.greeting.content";
+}
+

@@ -11,6 +11,16 @@
   <name>Auto Message</name>
   <description>Auto Message</description>
 	
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>23.1-jre</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
 	<dependencies>
 		<dependency>
 			<groupId>com.github.XDean</groupId>

@@ -8,7 +8,6 @@
 	</parent>
 	<artifactId>deannotation-methodReference-handler</artifactId>
 
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
