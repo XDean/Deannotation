@@ -19,6 +19,7 @@
 	<modules>
 		<module>aggregation</module>
 		<module>method-reference</module>
+		<module>auto-message</module>
 	</modules>
 
 	<developers>
@@ -78,6 +79,11 @@
 				<groupId>com.github.XDean</groupId>
 				<artifactId>AnnotationProcessorToolkit</artifactId>
 				<version>0.1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.squareup</groupId>
+				<artifactId>javapoet</artifactId>
+				<version>1.10.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.testing.compile</groupId>
