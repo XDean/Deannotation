@@ -1,20 +1,10 @@
 package xdean.annotation.processor;
 
-import static xdean.annotation.processor.toolkit.ElementUtil.*;
+import static xdean.annotation.processor.toolkit.ElementUtil.getAnnotationClassValue;
+import static xdean.annotation.processor.toolkit.ElementUtil.getAnnotationMirror;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -38,14 +27,14 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
 
 import com.google.auto.service.AutoService;
 
 import xdean.annotation.MethodRef;
 import xdean.annotation.MethodRef.Type;
 import xdean.annotation.processor.toolkit.AssertException;
+import xdean.annotation.processor.toolkit.CommonUtil;
+import xdean.annotation.processor.toolkit.NestCompileFile;
 import xdean.annotation.processor.toolkit.XAbstractProcessor;
 import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 
@@ -54,9 +43,11 @@ import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
   /**
-   * Use a file to record which annotations used {@link MethodRef} for nested dependency.
+   * Use a file to record which annotations used {@link MethodRef} for nested
+   * dependency.
    */
   private static final String RECORD_FILE = "META-INF/xdean/annotation/MethodRef";
+  private final NestCompileFile methodRefRecord = new NestCompileFile(RECORD_FILE);
   private TypeMirror classType, methodRefType, voidType;
   private Set<TypeElement> visitedClassAndMethod = new HashSet<>();
   private Set<String> allMethodRefAnnotations = new HashSet<>();
@@ -81,14 +72,11 @@ public class MethodRefProcessor extends XAbstractProcessor {
 
   private void generateConfigFiles(RoundEnvironment roundEnv) {
     try {
-      Filer filer = processingEnv.getFiler();
-      FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, "", RECORD_FILE);
-      OutputStream output = resource.openOutputStream();
-      PrintStream writer = new PrintStream(output, false, "UTF-8");
+      PrintStream writer = methodRefRecord.getPrintStream(filer);
       allMethodRefAnnotations.forEach(writer::println);
       writer.flush();
     } catch (IOException e) {
-      error().log("Unable to create " + RECORD_FILE + ", " + e);
+      error().log("Unable to create " + RECORD_FILE + " because " + e.getMessage() + ":\n" + CommonUtil.getStackTraceString(e));
     }
   }
 
@@ -96,22 +84,9 @@ public class MethodRefProcessor extends XAbstractProcessor {
   public Set<String> getSupportedAnnotationTypes() {
     Set<String> set = new HashSet<>(super.getSupportedAnnotationTypes());
     try {
-      Enumeration<URL> resource = getClass().getClassLoader().getResources(RECORD_FILE);
-      for (URL url : Collections.list(resource)) {
-        URI uri = url.toURI();
-        try {
-          FileSystems.getFileSystem(uri);
-        } catch (FileSystemNotFoundException e) {
-          Map<String, String> env = new HashMap<>();
-          env.put("create", "true");
-          FileSystems.newFileSystem(uri, env);
-        } catch (IllegalArgumentException e) {
-          debug().log(e.getMessage());
-        }
-        Files.readAllLines(Paths.get(uri)).forEach(set::add);
-      }
-    } catch (IOException | URISyntaxException e1) {
-      error().log("error happened when read record file: " + e1.getMessage());
+      methodRefRecord.readLines().forEach(set::add);
+    } catch (IOException e) {
+      error().log("error happened when read record file: " + e.getMessage() + ":\n" + CommonUtil.getStackTraceString(e));
     }
     return set;
   }
@@ -141,9 +116,11 @@ public class MethodRefProcessor extends XAbstractProcessor {
       getClassAndMethod = useAll(annotatedMethod, mr);
     } else if (mr.type() == Type.METHOD && mr.findInEnclosing()) {
       getClassAndMethod = useEnclosing(annotatedMethod, mr);
-    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
+    } else if (mr.type() == Type.METHOD
+        && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::defaultClass), voidType)) {
       getClassAndMethod = useDefaultClass(annotatedMethod, mr);
-    } else if (mr.type() == Type.METHOD && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
+    } else if (mr.type() == Type.METHOD
+        && !types.isSameType(getAnnotationClassValue(elements, mr, MethodRef::parentClass), methodRefType)) {
       getClassAndMethod = useParentClass(annotatedMethod, mr);
     } else {
       getClassAndMethod = useClassAndMethod(annotatedClass);
@@ -247,7 +224,8 @@ public class MethodRefProcessor extends XAbstractProcessor {
         Element enclosingElement = e.getEnclosingElement();
         Optional<AnnotationMirror> defaultAnnotation = getAnnotationMirror(enclosingElement, parentClass);
         if (defaultAnnotation.isPresent()) {
-          parentClzValue = elements.getElementValuesWithDefaults(defaultAnnotation.get()).get(parentValueMethod).getValue().toString();
+          parentClzValue = elements.getElementValuesWithDefaults(defaultAnnotation.get()).get(parentValueMethod).getValue()
+              .toString();
         }
       }
       String clzValue = values.get(clazz).getValue().toString();
@@ -260,7 +238,8 @@ public class MethodRefProcessor extends XAbstractProcessor {
     };
   }
 
-  private void valid(TypeElement theAnnotation, BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod, RoundEnvironment roundEnv) {
+  private void valid(TypeElement theAnnotation, BiFunction<Element, AnnotationMirror, String[]> getClassAndMethod,
+      RoundEnvironment roundEnv) {
     TypeMirror annoType = theAnnotation.asType();
     roundEnv.getElementsAnnotatedWith(theAnnotation).forEach(e -> handleAssert(() -> {
       AnnotationMirror anno = getAnnotationMirror(e, annoType).get();
@@ -299,6 +278,7 @@ public class MethodRefProcessor extends XAbstractProcessor {
             .filter(ee -> types.isAssignable(ee.getReturnType(), classType))
             .findAny()
             .orElse(null))
-                .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class", annotatedMethod));
+                .todo(() -> error().log("The parent annotation class must have an attribute named 'value' with type Class",
+                    annotatedMethod));
   }
 }
