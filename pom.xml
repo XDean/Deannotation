@@ -19,8 +19,6 @@
 	<modules>
 		<module>aggregation</module>
 		<module>method-reference</module>
-		<module>auto-message</module>
-		<module>checker</module>
 	</modules>
 
 	<developers>
