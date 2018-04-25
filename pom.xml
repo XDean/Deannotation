@@ -16,6 +16,11 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
+	<modules>
+		<module>aggregation</module>
+		<module>method-reference</module>
+	</modules>
+
 	<developers>
 		<developer>
 			<name>XDean</name>
