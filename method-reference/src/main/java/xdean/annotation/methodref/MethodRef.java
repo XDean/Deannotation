@@ -1,4 +1,4 @@
-package xdean.annotation;
+package xdean.annotation.methodref;
 
 import static java.lang.annotation.ElementType.METHOD;
 

@@ -1,4 +1,4 @@
-package xdean.annotation.processor;
+package xdean.annotation.methodref;
 
 import static xdean.annotation.processor.toolkit.ElementUtil.getAnnotationClassValue;
 import static xdean.annotation.processor.toolkit.ElementUtil.getAnnotationMirror;
@@ -30,8 +30,7 @@ import javax.lang.model.util.ElementFilter;
 
 import com.google.auto.service.AutoService;
 
-import xdean.annotation.MethodRef;
-import xdean.annotation.MethodRef.Type;
+import xdean.annotation.methodref.MethodRef.Type;
 import xdean.annotation.processor.toolkit.AssertException;
 import xdean.annotation.processor.toolkit.CommonUtil;
 import xdean.annotation.processor.toolkit.NestCompileFile;
@@ -43,8 +42,7 @@ import xdean.annotation.processor.toolkit.annotation.SupportedAnnotation;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class MethodRefProcessor extends XAbstractProcessor {
   /**
-   * Use a file to record which annotations used {@link MethodRef} for nested
-   * dependency.
+   * Use a file to record which annotations used {@link MethodRef} for nested dependency.
    */
   private static final String RECORD_FILE = "META-INF/xdean/annotation/MethodRef";
   private final NestCompileFile methodRefRecord = new NestCompileFile(RECORD_FILE);

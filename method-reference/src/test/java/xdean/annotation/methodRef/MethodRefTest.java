@@ -11,7 +11,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
 
-import xdean.annotation.processor.MethodRefProcessor;
+import xdean.annotation.methodref.MethodRefProcessor;
 
 public class MethodRefTest {
   private static final JavaFileObject GOLDEN = getSource("GoldenDefine.java");
